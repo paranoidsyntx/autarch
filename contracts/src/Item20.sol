@@ -16,10 +16,6 @@ contract Item20 is ERC20, IERC1046 {
         _uri = _tokenUri;
     }
 
-    function decimals() public pure override returns (uint8) {
-        return 0;
-    }
-
     function tokenURI() external view override returns (string memory) {
         return _uri;
     }
