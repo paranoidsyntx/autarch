@@ -4,9 +4,8 @@ pragma solidity ^0.8.0;
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
-import {AccessManaged} from "@openzeppelin/contracts/access/manager/AccessManaged.sol";
 
-contract Player721 is ERC721, AccessManaged {
+contract Character721 is ERC721 {
     using Strings for uint256;
 
     struct Stats {
@@ -27,21 +26,22 @@ contract Player721 is ERC721, AccessManaged {
         Stats stats;
     }
 
-    struct Player {
+    struct Character {
         Actor actor;
         uint256 classIndex;
     }
 
+    event CharacterMinted(uint256 indexed tokenId, string name, uint256 classIndex);
+
     Class[] public classes;
 
-    mapping(uint256 tokenId => Player) private _players;
-    uint256 private _totalPlayers;
+    mapping(uint256 tokenId => Character) private _characters;
+    uint256 private _totalCharacters;
 
     constructor(
         string memory _name,
-        string memory _symbol,
-        address _accessManager
-    ) ERC721(_name, _symbol) AccessManaged(_accessManager) {
+        string memory _symbol
+    ) ERC721(_name, _symbol) {
         classes.push(
             Class({
                 name: "Apprentice",
@@ -77,8 +77,8 @@ contract Player721 is ERC721, AccessManaged {
     ) public view override returns (string memory) {
         _requireOwned(tokenId);
 
-        Player memory player = _players[tokenId];
-        Class memory class = classes[player.classIndex];
+        Character memory character = _characters[tokenId];
+        Class memory class = classes[character.classIndex];
 
         string memory svgImage = string.concat(
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><image style="image-rendering: pixelated; image-rendering: crisp-edges;" href="',
@@ -92,22 +92,22 @@ contract Player721 is ERC721, AccessManaged {
             class.name,
             '"},',
             '{"trait_type":"HP","value":"',
-            player.actor.stats.hp.toString(),
+            character.actor.stats.hp.toString(),
             '"},',
             '{"trait_type":"Armor","value":"',
-            player.actor.stats.armor.toString(),
+            character.actor.stats.armor.toString(),
             '"},',
             '{"trait_type":"Attack","value":"',
-            player.actor.stats.attack.toString(),
+            character.actor.stats.attack.toString(),
             '"},',
             '{"trait_type":"Speed","value":"',
-            player.actor.stats.speed.toString(),
+            character.actor.stats.speed.toString(),
             '"}]'
         );
 
         string memory uri = string.concat(
             '{"name":"',
-            player.actor.name,
+            character.actor.name,
             '","description":"',
             "Autarch player character",
             '","image":"',
@@ -124,11 +124,11 @@ contract Player721 is ERC721, AccessManaged {
             );
     }
 
-    function mint(string memory _name, uint256 _classIndex) external restricted returns (uint256 tokenId) {
-        _totalPlayers++;
-        tokenId = _totalPlayers;
+    function mint(string memory _name, uint256 _classIndex) external returns (uint256 tokenId) {
+        _totalCharacters++;
+        tokenId = _totalCharacters;
 
-        _players[tokenId] = Player({
+        _characters[tokenId] = Character({
             actor: Actor({
                 name: _name,
                 stats: classes[_classIndex].stats
@@ -137,5 +137,7 @@ contract Player721 is ERC721, AccessManaged {
         });
 
         _mint(msg.sender, tokenId);
+
+        emit CharacterMinted(tokenId, _name, _classIndex);
     }
 }
