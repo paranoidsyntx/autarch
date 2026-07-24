@@ -21,12 +21,6 @@ contract Character721 is ERC721 {
         uint256 classIndex;
     }
 
-    event CharacterMinted(
-        uint256 indexed tokenId,
-        string name,
-        uint256 classIndex
-    );
-
     Class[] public classes;
 
     mapping(uint256 tokenId => Character) private _characters;
@@ -140,7 +134,5 @@ contract Character721 is ERC721 {
         });
 
         _mint(msg.sender, tokenId);
-
-        emit CharacterMinted(tokenId, _name, _classIndex);
     }
 }
