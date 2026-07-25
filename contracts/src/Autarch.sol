@@ -11,8 +11,8 @@ contract Autarch {
     error SenderAlreadyHasCharacter(address sender);
 
     event ItemCreated(
-        address indexed item,
         bytes32 indexed itemId,
+        address indexed item,
         string name,
         string symbol
     );
@@ -458,7 +458,7 @@ contract Autarch {
         }
         _itemAddresses[itemId] = item;
 
-        emit ItemCreated(item, itemId, name, symbol);
+        emit ItemCreated(itemId, item, name, symbol);
     }
 
     function _rollEncounters(
