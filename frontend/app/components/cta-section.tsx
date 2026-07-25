@@ -18,7 +18,7 @@ export function CtaSection() {
 
         <div className="mt-10">
           <PixelButton href="#" size="lg">
-            Play Autarch
+            Play
           </PixelButton>
         </div>
       </div>
