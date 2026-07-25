@@ -23,6 +23,9 @@ contract Deploy is Script {
             - Fuligin Cloak
             - Prismatic Spray
             - Baldanders' Serum
+            - Scale of Sadlark
+            - Sarsem's Ward
+            - Alzabo Blood
         */
 
         // Gold
@@ -146,12 +149,19 @@ contract Deploy is Script {
             effects: effects
         }));
 
+        // Sarsem's Ward
+
+        // Scale of Sadlark
+
+        // Alzabo Blood
+
         /* 
             Create weapons
             - Withered Avern
             - Terminus Est
             - Azoth
             - Avern
+            - 
         */
 
         // Withered Avern
