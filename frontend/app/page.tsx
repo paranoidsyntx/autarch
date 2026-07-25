@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ScreenshotsCarousel } from "@/components/screenshots-carousel";
 
 export default function Home() {
   return (
@@ -54,6 +55,9 @@ export default function Home() {
           culpa qui officia deserunt mollit anim id est laborum.
         </p>
       </section>
+
+      {/* Screenshots carousel section */}
+      <ScreenshotsCarousel />
     </main>
   );
 }
