@@ -86,6 +86,12 @@ contract Autarch {
         SPEED
     }
 
+    enum MonsterResolution {
+        CHARACTER_DEATH,
+        MONSTER_DEATH,
+        FLED
+    }
+
     struct Stats {
         uint256 maxHp; // +Apprentice
         uint256 armor; // +Knight
@@ -117,7 +123,7 @@ contract Autarch {
         bool self;
     }
 
-    struct Item {
+    struct ItemData {
         ItemType itemType;
         Effect[] effects;
     }
@@ -159,7 +165,7 @@ contract Autarch {
 
     Item20 public item20Implementation;
 
-    mapping(address item => Item) private _items;
+    mapping(address item => ItemData) private _itemData;
     StartingItem[] private _startingItems;
 
     Monster[] private _monsters;
@@ -183,7 +189,7 @@ contract Autarch {
     function createItem(
         string memory name,
         string memory symbol,
-        Item memory data
+        ItemData memory data
     ) external returns (address) {
         return _createItem(name, symbol, data);
     }
@@ -293,6 +299,9 @@ contract Autarch {
         if(items.length == 0) {
             revert("Must at least equip a weapon");
         }
+        if(_itemData[items[0]].itemType != ItemType.WEAPON) {
+            revert("First item must be a weapon");
+        }
         for(uint256 i = 0; i < items.length; i++) {
             // Allows single item to be equipped multiple times, good enough for hackathon
             if(Item20(items[i]).balanceOf(msg.sender) < 1 ether) {    
@@ -385,7 +394,7 @@ contract Autarch {
     function _createItem(
         string memory name,
         string memory symbol,
-        Item memory data
+        ItemData memory data
     ) internal returns (address item) {
         item = Clones.clone(address(item20Implementation));
         Item20(item).initialize(
@@ -393,10 +402,10 @@ contract Autarch {
             symbol
         );
 
-        Item storage sItem = _items[item];
-        sItem.itemType = data.itemType;
+        ItemData storage sItemData = _itemData[item];
+        sItemData.itemType = data.itemType;
         for (uint256 i = 0; i < data.effects.length; i++) {
-            sItem.effects.push(data.effects[i]);
+            sItemData.effects.push(data.effects[i]);
         }
 
         emit ItemCreated(item, name, symbol);
@@ -457,5 +466,126 @@ contract Autarch {
         }
     }
 
-    
+    function _resolveMonsterEncounter(
+        Actor memory character,
+        address[] memory items,
+        Monster memory monster
+    ) internal view returns (Actor memory, MonsterResolution) {
+        // Armor is a per-battle depletable shield; it resets each fight and does
+        // not persist, so track it locally rather than mutating the stat.
+        uint256 charArmor = character.stats.armor;
+        uint256 monsterArmor = monster.actor.stats.armor;
+
+        // TODO: Apply PASSIVE effects (character items + monster effects)
+        // TODO: Apply BATTLE_START effects
+
+        for (uint256 round = 0; round < 50; round++) {
+            // TODO: Apply TURN_START effects, tick POISON/ACID, skip turn on STUN
+
+            // Turn order is re-evaluated each round so mid-battle SPEED changes
+            // take effect: higher speed acts first, ties favor the monster.
+            bool characterFirst = character.stats.speed > monster.actor.stats.speed;
+
+            if (characterFirst) {
+                (monster.actor.hp, monsterArmor) =
+                    _characterTurn(character, items, monster.actor.hp, monsterArmor);
+                if (monster.actor.hp == 0) return (character, MonsterResolution.MONSTER_DEATH);
+
+                (character.hp, charArmor) = _monsterTurn(monster, character.hp, charArmor);
+                if (character.hp == 0) return (character, MonsterResolution.CHARACTER_DEATH);
+            } else {
+                (character.hp, charArmor) = _monsterTurn(monster, character.hp, charArmor);
+                if (character.hp == 0) return (character, MonsterResolution.CHARACTER_DEATH);
+
+                (monster.actor.hp, monsterArmor) =
+                    _characterTurn(character, items, monster.actor.hp, monsterArmor);
+                if (monster.actor.hp == 0) return (character, MonsterResolution.MONSTER_DEATH);
+            }
+        }
+
+        // 50-round cap reached: the monster flees and the character survives with
+        // whatever HP they have left.
+        return (character, MonsterResolution.FLED);
+    }
+
+    function _characterTurn(
+        Actor memory character,
+        address[] memory items,
+        uint256 targetHp,
+        uint256 targetArmor
+    ) internal view returns (uint256 newHp, uint256 newArmor) {
+        newHp = targetHp;
+        newArmor = targetArmor;
+
+        // Non-weapon items resolve first; the weapon (index 0) resolves last.
+        for (uint256 k = 1; k < items.length; k++) {
+            (newHp, newArmor) = _applyItemEffects(items[k], false, character, newHp, newArmor);
+        }
+        if (items.length > 0) {
+            (newHp, newArmor) = _applyItemEffects(items[0], true, character, newHp, newArmor);
+        }
+    }
+
+    function _applyItemEffects(
+        address item,
+        bool isWeapon,
+        Actor memory owner,
+        uint256 targetHp,
+        uint256 targetArmor
+    ) internal view returns (uint256 newHp, uint256 newArmor) {
+        newHp = targetHp;
+        newArmor = targetArmor;
+
+        Effect[] storage effects = _itemData[item].effects;
+        for (uint256 i = 0; i < effects.length; i++) {
+            Effect storage effect = effects[i];
+
+            if (effect.effectType == EffectType.DAMAGE && !effect.self && effect.value > 0) {
+                uint256 damage = uint256(effect.value);
+                // Only the weapon's DAMAGE effect adds the owner's attack stat.
+                if (isWeapon) {
+                    damage += owner.stats.attack;
+                }
+                (newHp, newArmor) = _applyDamage(newHp, newArmor, damage);
+            }
+            // TODO: handle HEAL, ARMOR, POISON, ACID, STUN, MAX_HP, ATTACK, SPEED
+            // TODO: honor EffectTrigger (every effect currently resolves on the owner's turn)
+            // TODO: honor `self` (self-targeted effects)
+        }
+    }
+
+    function _monsterTurn(
+        Monster memory monster,
+        uint256 targetHp,
+        uint256 targetArmor
+    ) internal pure returns (uint256 newHp, uint256 newArmor) {
+        newHp = targetHp;
+        newArmor = targetArmor;
+
+        for (uint256 i = 0; i < monster.effects.length; i++) {
+            Effect memory effect = monster.effects[i];
+
+            if (effect.effectType == EffectType.DAMAGE && !effect.self && effect.value > 0) {
+                // TODO: decide whether the monster's attack stat should add here
+                (newHp, newArmor) = _applyDamage(newHp, newArmor, uint256(effect.value));
+            }
+            // TODO: handle other effect types, triggers, and self-targeted effects
+        }
+    }
+
+    function _applyDamage(
+        uint256 hp,
+        uint256 armor,
+        uint256 damage
+    ) internal pure returns (uint256 newHp, uint256 newArmor) {
+        if (damage <= armor) {
+            return (hp, armor - damage);
+        }
+
+        // Armor fully absorbed; overflow spills onto HP.
+        // TODO: fire EXPOSED trigger now that armor has reached 0
+        damage -= armor;
+        newArmor = 0;
+        newHp = damage >= hp ? 0 : hp - damage;
+    }
 }

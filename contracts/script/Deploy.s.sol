@@ -29,7 +29,7 @@ contract Deploy is Script {
         */
 
         // Gold
-        address gold = autarch.createItem("Gold", "aGOLD", Autarch.Item({
+        address gold = autarch.createItem("Gold", "aGOLD", Autarch.ItemData({
             itemType: Autarch.ItemType.ITEM,
             effects: new Autarch.Effect[](0)
         }));
@@ -42,7 +42,7 @@ contract Deploy is Script {
             value: 4,
             self: true
         });
-        address osherlsMercy = autarch.createItem("Osherl's Mercy", "aOSHERLSMERCY", Autarch.Item({
+        address osherlsMercy = autarch.createItem("Osherl's Mercy", "aOSHERLSMERCY", Autarch.ItemData({
             itemType: Autarch.ItemType.ITEM,
             effects: effects
         }));
@@ -61,7 +61,7 @@ contract Deploy is Script {
             value: 1,
             self: true
         });
-        autarch.createItem("Mazirian's Boots", "aMAZIRIANSBOOTS", Autarch.Item({
+        autarch.createItem("Mazirian's Boots", "aMAZIRIANSBOOTS", Autarch.ItemData({
             itemType: Autarch.ItemType.ITEM,
             effects: effects
         }));
@@ -86,7 +86,7 @@ contract Deploy is Script {
             value: 1,
             self: true
         });
-        autarch.createItem("IOUN Stone", "aIOUNSTONE", Autarch.Item({
+        autarch.createItem("IOUN Stone", "aIOUNSTONE", Autarch.ItemData({
             itemType: Autarch.ItemType.ITEM,
             effects: effects
         }));
@@ -105,7 +105,7 @@ contract Deploy is Script {
             value: 5,
             self: true
         });
-        autarch.createItem("Conciliator's Claw", "aCONCILIATORSCLAW", Autarch.Item({
+        autarch.createItem("Conciliator's Claw", "aCONCILIATORSCLAW", Autarch.ItemData({
             itemType: Autarch.ItemType.ITEM,
             effects: effects
         }));
@@ -118,7 +118,7 @@ contract Deploy is Script {
             value: 2,
             self: true
         });
-        autarch.createItem("Fuligin Cloak", "aFULIGINCLOAK", Autarch.Item({
+        autarch.createItem("Fuligin Cloak", "aFULIGINCLOAK", Autarch.ItemData({
             itemType: Autarch.ItemType.ITEM,
             effects: effects
         }));
@@ -131,7 +131,7 @@ contract Deploy is Script {
             value: 3,
             self: false
         });
-        autarch.createItem("Prismatic Spray", "aPRISMATICSPRAY", Autarch.Item({
+        autarch.createItem("Prismatic Spray", "aPRISMATICSPRAY", Autarch.ItemData({
             itemType: Autarch.ItemType.ITEM,
             effects: effects
         }));
@@ -144,7 +144,7 @@ contract Deploy is Script {
             value: 7,
             self: true
         });
-        autarch.createItem("Baldanders' Serum", "aBALDANDERSSErum", Autarch.Item({
+        autarch.createItem("Baldanders' Serum", "aBALDANDERSSErum", Autarch.ItemData({
             itemType: Autarch.ItemType.ITEM,
             effects: effects
         }));
@@ -157,7 +157,7 @@ contract Deploy is Script {
             value: 5,
             self: true
         });
-        autarch.createItem("Sarsem's Ward", "aSARSEMSWARD", Autarch.Item({
+        autarch.createItem("Sarsem's Ward", "aSARSEMSWARD", Autarch.ItemData({
             itemType: Autarch.ItemType.ITEM,
             effects: effects
         }));
@@ -170,7 +170,7 @@ contract Deploy is Script {
             value: 3,
             self: true
         });
-        autarch.createItem("Scale of Sadlark", "aSCALEOFSADLARK", Autarch.Item({
+        autarch.createItem("Scale of Sadlark", "aSCALEOFSADLARK", Autarch.ItemData({
             itemType: Autarch.ItemType.ITEM,
             effects: effects
         }));
@@ -183,7 +183,7 @@ contract Deploy is Script {
             value: 2,
             self: false
         });
-        autarch.createItem("Amulet of Atulos", "aAMULETOFATULOS", Autarch.Item({
+        autarch.createItem("Amulet of Atulos", "aAMULETOFATULOS", Autarch.ItemData({
             itemType: Autarch.ItemType.ITEM,
             effects: effects
         }));
@@ -206,7 +206,7 @@ contract Deploy is Script {
             value: 1,
             self: false
         });
-        address witheredAvern = autarch.createItem("Withered Avern", "aWITHEREDAVERN", Autarch.Item({
+        address witheredAvern = autarch.createItem("Withered Avern", "aWITHEREDAVERN", Autarch.ItemData({
             itemType: Autarch.ItemType.WEAPON,
             effects: effects
         }));
@@ -225,7 +225,7 @@ contract Deploy is Script {
             value: 4,
             self: false
         });
-        autarch.createItem("Terminus Est", "aTERMINUSEST", Autarch.Item({
+        autarch.createItem("Terminus Est", "aTERMINUSEST", Autarch.ItemData({
             itemType: Autarch.ItemType.WEAPON,
             effects: effects
         }));
@@ -238,7 +238,7 @@ contract Deploy is Script {
             value: 5,
             self: false
         });
-        autarch.createItem("Azoth", "aAZOTH", Autarch.Item({
+        autarch.createItem("Azoth", "aAZOTH", Autarch.ItemData({
             itemType: Autarch.ItemType.WEAPON,
             effects: effects
         }));
@@ -257,7 +257,7 @@ contract Deploy is Script {
             value: 1,
             self: false
         });
-        autarch.createItem("Avern", "aAVERN", Autarch.Item({
+        autarch.createItem("Avern", "aAVERN", Autarch.ItemData({
             itemType: Autarch.ItemType.WEAPON,
             effects: effects
         }));
@@ -276,7 +276,7 @@ contract Deploy is Script {
             value: 2,
             self: false
         });
-        autarch.createItem("Scythe of Hierax", "aSCYTHEOFHIERAX", Autarch.Item({
+        autarch.createItem("Scythe of Hierax", "aSCYTHEOFHIERAX", Autarch.ItemData({
             itemType: Autarch.ItemType.WEAPON,
             effects: effects
         }));
@@ -289,7 +289,7 @@ contract Deploy is Script {
             value: 3,
             self: false
         });
-        autarch.createItem("Axe of Lundor", "aAXEOFLUNDOR", Autarch.Item({
+        autarch.createItem("Axe of Lundor", "aAXEOFLUNDOR", Autarch.ItemData({
             itemType: Autarch.ItemType.WEAPON,
             effects: effects
         }));
