@@ -1,65 +1,106 @@
 import Image from "next/image";
+import { ScreenshotsCarousel } from "@/components/screenshots-carousel";
+import { SectionHeading } from "@/components/section-heading";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+    <main className="flex flex-1 flex-col bg-background text-foreground">
+      {/* Title section */}
+      <section className="flex flex-col items-center">
+        {/* Background image: full width, top-aligned, pixelated */}
         <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
+          src="/castle-landmark.png"
+          alt="Pixel art castle perched on a rocky cliff above the sea"
+          width={320}
+          height={80}
           priority
+          className="pixelated -mt-[8.3vw] w-full h-auto object-cover"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+
+        {/* Title */}
+        <h1 className="font-display text-center text-[9rem] sm:text-[16rem] leading-none text-balance text-gold -mt-12">
+          Autarch
+        </h1>
+
+        {/* Play button */}
+        <a
+          href="#play"
+          className="font-pixel mt-10 inline-flex select-none items-center justify-center border-2 border-accent bg-transparent px-12 py-3 text-sm uppercase tracking-[0.3em] text-accent transition-colors hover:bg-accent hover:text-background focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:text-base"
+        >
+          Play
+        </a>
+      </section>
+
+      {/* The Gameplay section */}
+      <section className="mx-auto w-full max-w-5xl px-6 py-24">
+        <SectionHeading title="Gameplay" />
+
+        <div className="mt-8 grid items-start gap-10 sm:grid-cols-[auto_1fr] sm:gap-14">
+          {/* Swords sprite */}
+          <div className="mx-auto flex items-center justify-center sm:mx-0">
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+              src="/swords.png"
+              alt="Pixel art crossed swords"
+              width={64}
+              height={64}
+              className="pixelated h-36 w-36 sm:h-44 sm:w-44"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+
+          {/* Body copy */}
+          <div>
+            <p className="text-sm leading-relaxed text-muted-foreground first-letter:mr-3 first-letter:float-left first-letter:font-display first-letter:text-6xl first-letter:leading-none first-letter:text-accent sm:text-base">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+              enim ad minim veniam, quis nostrud exercitation ullamco laboris
+              nisi ut aliquip ex ea commodo consequat.
+            </p>
+            <p className="mt-6 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Duis aute irure dolor in reprehenderit in voluptate velit esse
+              cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+              cupidatat non proident, sunt in culpa qui officia deserunt mollit
+              anim id est laborum.
+            </p>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* The Lore section */}
+      <section className="mx-auto w-full max-w-5xl px-6 py-24">
+        <SectionHeading title="The Lore" />
+
+        <div className="mt-8 grid items-start gap-10 sm:grid-cols-[auto_1fr] sm:gap-14">
+          {/* Book sprite */}
+          <div className="mx-auto flex items-center justify-center sm:mx-0">
+            <Image
+              src="/book.png"
+              alt="Pixel art open book"
+              width={64}
+              height={64}
+              className="pixelated h-36 w-36 sm:h-44 sm:w-44"
+            />
+          </div>
+
+          {/* Body copy */}
+          <div>
+            <p className="text-sm leading-relaxed text-muted-foreground first-letter:mr-3 first-letter:float-left first-letter:font-display first-letter:text-6xl first-letter:leading-none first-letter:text-accent sm:text-base">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+              enim ad minim veniam, quis nostrud exercitation ullamco laboris
+              nisi ut aliquip ex ea commodo consequat.
+            </p>
+            <p className="mt-6 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Duis aute irure dolor in reprehenderit in voluptate velit esse
+              cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+              cupidatat non proident, sunt in culpa qui officia deserunt mollit
+              anim id est laborum.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Screenshots carousel section */}
+      <ScreenshotsCarousel />
+    </main>
   );
 }
