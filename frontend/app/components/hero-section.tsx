@@ -21,7 +21,7 @@ export function HeroSection() {
 
         <div className="mt-2 flex flex-col items-center gap-6">
           <PixelButton href="#play" size="lg">
-            Play Now
+            Play
           </PixelButton>
           <span className="animate-blink font-display text-[9px] uppercase tracking-widest text-muted">
             Scroll to descend
