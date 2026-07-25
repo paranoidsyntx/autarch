@@ -1,237 +1,80 @@
 @import "tailwindcss";
 
 :root {
-  /* Roguelike dungeon palette (RotMG-inspired) */
-  --frame: #000000;
-  --hud: #0c0a09;
-  --hud-line: #2a2320;
-
-  --background: #17110e;
-  --foreground: #e9ddc2;
-  --muted: #9a8f79;
-
-  /* maroon brick walls */
-  --wall: #5a2626;
-  --wall-top: #7d3535;
-  --wall-mortar: #2e1414;
-
-  /* grey cobble floor */
-  --floor: #3d3d3d;
-  --floor-line: #545454;
-
-  /* accents */
-  --torch: #e7a938;
-  --torch-deep: #b5661a;
-  --water: #274a9e;
-  --water-light: #3a63c4;
-  --hp: #cf3b3b;
-  --shield: #3f8f52;
-  --mana: #3b6ad2;
-  --gold: #d9a441;
+  --background: #000000;
+  --foreground: #ffffff;
+  --muted: #8a8a8a;
+  --line: #ffffff;
 }
 
 @theme inline {
-  --color-frame: var(--frame);
-  --color-hud: var(--hud);
-  --color-hud-line: var(--hud-line);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
-  --color-wall: var(--wall);
-  --color-wall-top: var(--wall-top);
-  --color-floor: var(--floor);
-  --color-torch: var(--torch);
-  --color-torch-deep: var(--torch-deep);
-  --color-water: var(--water);
-  --color-water-light: var(--water-light);
-  --color-hp: var(--hp);
-  --color-shield: var(--shield);
-  --color-mana: var(--mana);
-  --color-gold: var(--gold);
+  --color-line: var(--line);
   --font-sans: var(--font-vt323);
   --font-display: var(--font-press-start);
   --font-mono: var(--font-vt323);
 }
 
 html {
-  background: var(--frame);
+  background: var(--background);
 }
 
 body {
-  background: var(--frame);
+  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-vt323), monospace;
 }
 
-/* Keep every pixel sprite crisp */
-img,
-.pixelated {
-  image-rendering: pixelated;
+/* Crisp square outline box */
+.pixel-box {
+  border: 2px solid var(--line);
 }
 
-/* ---------- Dungeon surfaces ---------- */
-
-/* Maroon brick wall (running-bond via two offset layers) */
-.dungeon-wall {
-  background-color: var(--wall);
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      transparent 0 22px,
-      var(--wall-mortar) 22px 24px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      transparent 0 30px,
-      var(--wall-mortar) 30px 32px
-    );
-  background-size:
-    32px 48px,
-    32px 48px;
-}
-/* lighter cap along the inner edge of a wall */
-.wall-cap-right {
-  box-shadow: inset -6px 0 0 0 var(--wall-top);
-}
-.wall-cap-left {
-  box-shadow: inset 6px 0 0 0 var(--wall-top);
+/* Nested double outline */
+.pixel-box-double {
+  border: 2px solid var(--line);
+  box-shadow: inset 0 0 0 4px #000, inset 0 0 0 6px var(--line);
 }
 
-/* Grey cobble floor built from the extracted sprite */
-.dungeon-floor {
-  background-color: var(--floor);
-  background-image: url(/sprites/x/brick.png);
-  background-size: 48px 48px;
-  background-repeat: repeat;
-}
-
-/* Diamond-net floor accent (RotMG center-room look) */
-.floor-net {
-  background-color: #454545;
-  background-image:
-    repeating-linear-gradient(45deg, var(--floor-line) 0 2px, transparent 2px 14px),
-    repeating-linear-gradient(-45deg, var(--floor-line) 0 2px, transparent 2px 14px);
-}
-
-/* Animated water */
-.dungeon-water {
-  background-color: var(--water);
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      var(--water-light) 0 3px,
-      transparent 3px 10px
-    );
-  background-size: 100% 20px;
-  animation: water-flow 1.4s steps(4, end) infinite;
-}
-@keyframes water-flow {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: 0 20px;
-  }
-}
-
-/* ---------- Pixel frames & buttons ---------- */
-
-.pixel-frame {
-  border: 4px solid #000;
-  box-shadow:
-    inset 0 0 0 2px var(--hud-line),
-    inset 0 0 0 4px #000;
-}
-
-.pixel-slot {
-  background: #1a1512;
-  border: 3px solid #000;
-  box-shadow: inset 0 0 0 2px #3a2f28;
-}
-
+/* Outlined button */
 .pixel-btn {
   font-family: var(--font-press-start), monospace;
-  color: #1c1206;
-  background: var(--torch);
-  border: 4px solid #000;
-  box-shadow:
-    inset -4px -4px 0 0 var(--torch-deep),
-    inset 4px 4px 0 0 #f6cf72;
-  transition: transform 80ms steps(2);
+  color: #000;
+  background: var(--foreground);
+  border: 2px solid var(--line);
+  transition: background 80ms steps(2), color 80ms steps(2);
 }
 .pixel-btn:hover {
-  background: #f2bd4d;
-  filter: brightness(1.08);
+  background: #000;
+  color: var(--foreground);
 }
 .pixel-btn:active {
-  transform: translateY(3px);
-  box-shadow:
-    inset 4px 4px 0 0 var(--torch-deep),
-    inset -4px -4px 0 0 #f6cf72;
+  transform: translateY(2px);
 }
 
-/* ---------- Animations ---------- */
-@keyframes flicker {
-  0%,
-  100% {
-    opacity: 1;
-    filter: brightness(1.1);
-  }
-  25% {
-    opacity: 0.9;
-    filter: brightness(1.25);
-  }
-  50% {
-    opacity: 1;
-    filter: brightness(0.95);
-  }
-  75% {
-    opacity: 0.85;
-    filter: brightness(1.2);
-  }
+/* Ghost (outline-only) button */
+.pixel-btn-ghost {
+  font-family: var(--font-press-start), monospace;
+  color: var(--foreground);
+  background: transparent;
+  border: 2px solid var(--line);
+  transition: background 80ms steps(2), color 80ms steps(2);
 }
-.animate-flicker {
-  animation: flicker 260ms steps(2, end) infinite;
+.pixel-btn-ghost:hover {
+  background: var(--foreground);
+  color: #000;
+}
+.pixel-btn-ghost:active {
+  transform: translateY(2px);
 }
 
-@keyframes glow-pulse {
-  0%,
-  100% {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.12);
-  }
-}
-.animate-glow {
-  animation: glow-pulse 1.8s ease-in-out infinite;
-}
-
+/* Blinking caret / cursor */
 @keyframes blink {
-  0%,
-  49% {
-    opacity: 1;
-  }
-  50%,
-  100% {
-    opacity: 0;
-  }
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 .animate-blink {
   animation: blink 1s steps(1, end) infinite;
-}
-
-@keyframes bob {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
-}
-.animate-bob {
-  animation: bob 2.4s ease-in-out infinite;
 }

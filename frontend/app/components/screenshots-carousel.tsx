@@ -1,22 +1,18 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 
 const screenshots = [
   {
-    src: "/images/screenshot-1.png",
-    alt: "Top-down dungeon room with a knight, treasure chest and skeletons",
+    label: "SCREENSHOT 01",
     caption: "Delve torch-lit halls of the restless dead",
   },
   {
-    src: "/images/screenshot-2.png",
-    alt: "Boss battle against a glowing dragon in a lava cavern",
+    label: "SCREENSHOT 02",
     caption: "Face the wardens of the deep",
   },
   {
-    src: "/images/screenshot-3.png",
-    alt: "Inventory screen full of glowing weapons, armor and gold",
+    label: "SCREENSHOT 03",
     caption: "Hoard on-chain loot that is truly yours",
   },
 ];
@@ -29,8 +25,8 @@ export function ScreenshotsCarousel() {
   const current = screenshots[index];
 
   return (
-    <section className="relative px-6 py-24">
-      <h2 className="text-center font-display text-xl leading-relaxed text-torch drop-shadow-[3px_3px_0_#000] sm:text-3xl">
+    <section className="relative border-t-2 border-line px-6 py-24">
+      <h2 className="text-center font-display text-xl leading-relaxed text-foreground sm:text-3xl">
         Glimpses of the Depths
       </h2>
       <p className="mx-auto mt-5 max-w-xl text-pretty text-center font-sans text-xl leading-relaxed text-muted">
@@ -38,17 +34,17 @@ export function ScreenshotsCarousel() {
       </p>
 
       <div className="mx-auto mt-12 max-w-3xl">
-        <div className="pixel-frame relative aspect-video overflow-hidden bg-black">
-          <Image
-            key={current.src}
-            src={current.src}
-            alt={current.alt}
-            fill
-            className="pixelated object-cover"
-            sizes="(max-width: 768px) 100vw, 768px"
-          />
-          <div className="absolute inset-x-0 bottom-0 bg-hud/90 px-5 py-3">
-            <p className="font-display text-[10px] uppercase tracking-widest text-torch sm:text-xs">
+        <div className="pixel-box relative aspect-video overflow-hidden bg-background">
+          {/* Placeholder frame — text + outline only */}
+          <div className="flex h-full w-full flex-col items-center justify-center gap-3">
+            <span className="font-display text-sm uppercase tracking-widest text-muted sm:text-lg">
+              {current.label}
+            </span>
+            <span className="font-sans text-lg text-muted">[ placeholder ]</span>
+          </div>
+
+          <div className="absolute inset-x-0 bottom-0 border-t-2 border-line bg-background px-5 py-3">
+            <p className="font-display text-[10px] uppercase tracking-widest text-foreground sm:text-xs">
               {current.caption}
             </p>
           </div>
@@ -57,7 +53,7 @@ export function ScreenshotsCarousel() {
             type="button"
             onClick={() => go(-1)}
             aria-label="Previous screenshot"
-            className="pixel-slot absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center font-display text-xs text-torch transition-colors hover:text-foreground focus:outline-none focus-visible:ring-4 focus-visible:ring-torch/60"
+            className="pixel-btn-ghost absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center font-display text-xs"
           >
             {"<"}
           </button>
@@ -65,7 +61,7 @@ export function ScreenshotsCarousel() {
             type="button"
             onClick={() => go(1)}
             aria-label="Next screenshot"
-            className="pixel-slot absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center font-display text-xs text-torch transition-colors hover:text-foreground focus:outline-none focus-visible:ring-4 focus-visible:ring-torch/60"
+            className="pixel-btn-ghost absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center font-display text-xs"
           >
             {">"}
           </button>
@@ -74,13 +70,13 @@ export function ScreenshotsCarousel() {
         <div className="mt-6 flex items-center justify-center gap-4">
           {screenshots.map((s, i) => (
             <button
-              key={s.src}
+              key={s.label}
               type="button"
               onClick={() => setIndex(i)}
               aria-label={`Go to screenshot ${i + 1}`}
               aria-current={i === index}
-              className={`h-4 w-4 border-2 border-black transition-colors ${
-                i === index ? "bg-torch" : "bg-floor hover:bg-muted"
+              className={`h-4 w-4 border-2 border-line transition-colors ${
+                i === index ? "bg-foreground" : "bg-background hover:bg-muted"
               }`}
             />
           ))}
