@@ -1,73 +1,65 @@
-import Image from "next/image";
+import { GameHud } from "./components/game-hud";
 import { HeroSection } from "./components/hero-section";
 import { AboutSection } from "./components/about-section";
 import { ScreenshotsCarousel } from "./components/screenshots-carousel";
 import { CtaSection } from "./components/cta-section";
-import { Torch } from "./components/torch";
+import { Lantern } from "./components/lantern";
+import { Sprite } from "./components/sprite";
+
+/** A vertical strip of maroon brick wall that flanks the descending shaft. */
+function WallColumn({ side }: { side: "left" | "right" }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`dungeon-wall relative hidden w-16 shrink-0 md:block lg:w-24 ${
+        side === "left" ? "wall-cap-right" : "wall-cap-left"
+      }`}
+    >
+      {/* lanterns spaced down the wall */}
+      <div className="sticky top-24 flex flex-col items-center gap-[55vh] py-24">
+        <Lantern scale={1} />
+        <Lantern scale={1} />
+        <Lantern scale={1} />
+      </div>
+
+      {/* a cobweb tucked into the top corner */}
+      <div
+        className={`absolute top-2 ${
+          side === "left" ? "left-1" : "right-1 -scale-x-100"
+        }`}
+      >
+        <Sprite name="web" scale={1} tint="bone" />
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
-    <main className="relative flex-1 overflow-hidden bg-background">
-      {/* ---- Dungeon side walls (cobblestone) ---- */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-repeat sm:w-20 md:w-28"
-        style={{
-          backgroundImage: "url(/images/cobble-wall.png)",
-          backgroundSize: "128px",
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/10" />
+    <>
+      <GameHud />
+
+      {/* The dungeon shaft: two brick walls with the descending floor between */}
+      <div className="flex flex-1 justify-center bg-frame">
+        <WallColumn side="left" />
+
+        <main className="dungeon-floor relative w-full max-w-5xl flex-1 border-x-4 border-black">
+          {/* Progressive darkening overlay — deeper = darker */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-transparent via-background/40 to-black"
+          />
+
+          <div className="relative z-10">
+            <HeroSection />
+            <AboutSection />
+            <ScreenshotsCarousel />
+            <CtaSection />
+          </div>
+        </main>
+
+        <WallColumn side="right" />
       </div>
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-repeat sm:w-20 md:w-28"
-        style={{
-          backgroundImage: "url(/images/cobble-wall.png)",
-          backgroundSize: "128px",
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-l from-black/60 to-black/10" />
-      </div>
-
-      {/* ---- Torches mounted down the descent ---- */}
-      <Torch side="left" className="top-[22%]" />
-      <Torch side="right" className="top-[34%]" />
-      <Torch side="left" className="top-[52%]" />
-      <Torch side="right" className="top-[68%]" />
-      <Torch side="left" className="top-[84%]" />
-
-      {/* ---- Spider webs in the corners ---- */}
-      <Image
-        src="/images/web.png"
-        alt=""
-        aria-hidden="true"
-        width={160}
-        height={160}
-        className="pointer-events-none absolute left-8 top-[8%] h-24 w-24 opacity-70 mix-blend-screen sm:left-20 sm:h-32 sm:w-32"
-      />
-      <Image
-        src="/images/web.png"
-        alt=""
-        aria-hidden="true"
-        width={160}
-        height={160}
-        className="pointer-events-none absolute right-8 top-[58%] h-24 w-24 -scale-x-100 opacity-70 mix-blend-screen sm:right-20 sm:h-32 sm:w-32"
-      />
-
-      {/* ---- Overall descent darkening overlay ---- */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-transparent via-background/20 to-black"
-      />
-
-      {/* ---- Content ---- */}
-      <div className="relative z-10">
-        <HeroSection />
-        <AboutSection />
-        <ScreenshotsCarousel />
-        <CtaSection />
-      </div>
-    </main>
+    </>
   );
 }
