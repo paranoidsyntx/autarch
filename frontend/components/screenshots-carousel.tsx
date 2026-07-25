@@ -54,30 +54,12 @@ export function ScreenshotsCarousel() {
     setPaused(false);
   };
 
-  const pad = (n: number) => String(n).padStart(2, "0");
-
   return (
     <section className="mx-auto w-full max-w-5xl px-6 py-24 sm:py-32">
       <SectionHeading kicker="Gallery" title="Screenshots" />
 
       {/* Framed viewer */}
       <div className="relative mt-16 border-2 border-foreground sm:mt-20">
-        {/* Gold corner accents */}
-        <span className="absolute -left-[3px] -top-[3px] h-2.5 w-2.5 bg-gold" aria-hidden="true" />
-        <span className="absolute -right-[3px] -top-[3px] h-2.5 w-2.5 bg-gold" aria-hidden="true" />
-        <span className="absolute -bottom-[3px] -left-[3px] h-2.5 w-2.5 bg-gold" aria-hidden="true" />
-        <span className="absolute -bottom-[3px] -right-[3px] h-2.5 w-2.5 bg-gold" aria-hidden="true" />
-
-        {/* Caption bar */}
-        <div className="flex items-center justify-between border-b-2 border-foreground px-4 py-3">
-          <span className="font-pixel text-[10px] uppercase tracking-[0.2em] text-gold sm:text-xs">
-            {SLIDES[index].label}
-          </span>
-          <span className="font-pixel text-[10px] tracking-[0.2em] text-muted-foreground sm:text-xs">
-            {pad(index + 1)} / {pad(count)}
-          </span>
-        </div>
-
         {/* Slides */}
         <div
           className="overflow-hidden"
