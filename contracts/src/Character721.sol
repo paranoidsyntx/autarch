@@ -18,6 +18,7 @@ contract Character721 is ERC721 {
 
     struct Character {
         string name;
+        uint256 exp;
         Autarch.Actor actor;
         uint256 classId;
     }
@@ -131,6 +132,7 @@ contract Character721 is ERC721 {
 
         _characters[tokenId] = Character({
             name: _name,
+            exp: 0,
             actor: Autarch.Actor({
                 hp: classes[_classId].stats.maxHp,
                 stats: classes[_classId].stats
@@ -139,5 +141,12 @@ contract Character721 is ERC721 {
         });
 
         _mint(msg.sender, tokenId);
+    }
+
+    function gainExp(
+        uint256 tokenId,
+        uint256 _exp
+    ) external {
+        _characters[tokenId].exp += _exp;
     }
 }
