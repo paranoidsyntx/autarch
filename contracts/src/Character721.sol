@@ -34,28 +34,28 @@ contract Character721 is ERC721 {
             Class({
                 name: "Apprentice",
                 imageData: "UklGRpABAABXRUJQVlA4WAoAAAAIAAAAHwAAHwAAVlA4TJIAAAAvH8AHAAWjto0EhT9pP3Zm945BRP8noE/1LYUqvtDM4U1BRZGXqEKEF9plvtIMqbdSUUHRg0ojVA/azSWf2NOHrlyRytAbXUAV7arkmAu2WdUytnL45SxS31G57XJT0eJidlY6ujaWs8r5RjmrKG+Us9kHCjH5QKFMltoUpOqCXuRFizpksuhFQvmgrWFv6DxkAUVYSUbYAAAASUkqAAgAAAAGABIBAwABAAAAAQAAABoBBQABAAAAVgAAABsBBQABAAAAXgAAACgBAwABAAAAAgAAADEBAgARAAAAZgAAAGmHBAABAAAAeAAAAAAAAABgAAAAAQAAAGAAAAABAAAAUGFpbnQuTkVUIDUuMS4xMgAABQAAkAcABAAAADAyMzABoAMAAQAAAAEAAAACoAQAAQAAACAAAAADoAQAAQAAACAAAAAFoAQAAQAAALoAAAAAAAAAAgABAAIABAAAAFI5OAACAAcABAAAADAxMDAAAAAA",
-                stats: Autarch.Stats({hp: 15, armor: 0, attack: 1, speed: 1})
+                stats: Autarch.Stats({maxHp: 15, armor: 0, attack: 1, speed: 1})
             })
         );
         classes.push(
             Class({
                 name: "Knight",
                 imageData: "UklGRowBAABXRUJQVlA4WAoAAAAIAAAAHwAAHwAAVlA4TI0AAAAvH8AHAAWitm1k/qTzuN3uIET0fwLo9DHXh67oZlFM5T6EimZ1kypkkZ3mjeomFi52wQ42yjn4oobl8VgDyt9Iab8okgeLDpmUsmlI4hcJvVXWf+pXbtVGKWXXB+uVroRGLm5oU86CoagwFVS2jRiCBxUVR94HFFVT84pyKXNYkIosw4d99ll0oidjVwoARVhJRtgAAABJSSoACAAAAAYAEgEDAAEAAAABAAAAGgEFAAEAAABWAAAAGwEFAAEAAABeAAAAKAEDAAEAAAACAAAAMQECABEAAABmAAAAaYcEAAEAAAB4AAAAAAAAAGAAAAABAAAAYAAAAAEAAABQYWludC5ORVQgNS4xLjEyAAAFAACQBwAEAAAAMDIzMAGgAwABAAAAAQAAAAKgBAABAAAAIAAAAAOgBAABAAAAIAAAAAWgBAABAAAAugAAAAAAAAACAAEAAgAEAAAAUjk4AAIABwAEAAAAMDEwMAAAAAA=",
-                stats: Autarch.Stats({hp: 10, armor: 5, attack: 1, speed: 1})
+                stats: Autarch.Stats({maxHp: 10, armor: 5, attack: 1, speed: 1})
             })
         );
         classes.push(
             Class({
                 name: "Magician",
                 imageData: "UklGRpABAABXRUJQVlA4WAoAAAAIAAAAHwAAHwAAVlA4TJEAAAAvH8AHAIWjtpEEyfxJ5zHdM3s6AhH9nwD/WJ9VgvqkUAX1VFQ6j17omuolXPRQmS/OoYTeVAcZ2znGYc9grFyU0KnhPpJmegmqVNL5Gxp1BClbKPouVdKScnXiggy6fOjCYdEyd8ptaGlRRVddjeaE6EUV5GzKRCM0pKt9q0irLXux6QtC+YGOex+ImzyIOgwWAEVYSUbYAAAASUkqAAgAAAAGABIBAwABAAAAAQAAABoBBQABAAAAVgAAABsBBQABAAAAXgAAACgBAwABAAAAAgAAADEBAgARAAAAZgAAAGmHBAABAAAAeAAAAAAAAABgAAAAAQAAAGAAAAABAAAAUGFpbnQuTkVUIDUuMS4xMgAABQAAkAcABAAAADAyMzABoAMAAQAAAAEAAAACoAQAAQAAACAAAAADoAQAAQAAACAAAAAFoAQAAQAAALoAAAAAAAAAAgABAAIABAAAAFI5OAACAAcABAAAADAxMDAAAAAA",
-                stats: Autarch.Stats({hp: 10, armor: 0, attack: 2, speed: 1})
+                stats: Autarch.Stats({maxHp: 10, armor: 0, attack: 2, speed: 1})
             })
         );
         classes.push(
             Class({
                 name: "Rogue",
                 imageData: "UklGRoYBAABXRUJQVlA4WAoAAAAIAAAAHwAAHwAAVlA4TIgAAAAvH8AHAAWjto0EhT9pP3Z2bo9BRP8noI/mXts+8fWbdfXNttG73lj2xrK/2tq491evXHvk3meDa1ssXJtdvzVaHnnX/KCLTQirrqoUxdCBigZCDA2VZihi6BILRXFcFY0oVTDpNBSlkUOzKZKjrDKlyk2ZKqocVNlRLDBgmjUOkg9kJTu6X64DRVhJRtgAAABJSSoACAAAAAYAEgEDAAEAAAABAAAAGgEFAAEAAABWAAAAGwEFAAEAAABeAAAAKAEDAAEAAAACAAAAMQECABEAAABmAAAAaYcEAAEAAAB4AAAAAAAAAGAAAAABAAAAYAAAAAEAAABQYWludC5ORVQgNS4xLjEyAAAFAACQBwAEAAAAMDIzMAGgAwABAAAAAQAAAAKgBAABAAAAIAAAAAOgBAABAAAAIAAAAAWgBAABAAAAugAAAAAAAAACAAEAAgAEAAAAUjk4AAIABwAEAAAAMDEwMAAAAAA=",
-                stats: Autarch.Stats({hp: 10, armor: 0, attack: 1, speed: 2})
+                stats: Autarch.Stats({maxHp: 10, armor: 0, attack: 1, speed: 2})
             })
         );
     }
@@ -80,7 +80,10 @@ contract Character721 is ERC721 {
             class.name,
             '"},',
             '{"trait_type":"HP","value":"',
-            character.actor.stats.hp.toString(),
+            character.actor.hp.toString(),
+            '"},',
+            '{"trait_type":"Max HP","value":"',
+            character.actor.stats.maxHp.toString(),
             '"},',
             '{"trait_type":"Armor","value":"',
             character.actor.stats.armor.toString(),
@@ -128,6 +131,7 @@ contract Character721 is ERC721 {
         _characters[tokenId] = Character({
             actor: Autarch.Actor({
                 name: _name,
+                hp: classes[_classIndex].stats.maxHp,
                 stats: classes[_classIndex].stats
             }),
             classIndex: _classIndex

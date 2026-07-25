@@ -2,22 +2,25 @@
 pragma solidity ^0.8.0;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-import {IERC1046} from "./utils/IERC1046.sol";
+contract Item20 is ERC20, Initializable {
+    string private _name;
+    string private _symbol;
 
-contract Item20 is ERC20, IERC1046 {
-    string private _uri;
+    constructor() ERC20("", "") {}
 
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        string memory _tokenUri
-    ) ERC20(_name, _symbol) {
-        _uri = _tokenUri;
+    function initialize(string memory name_, string memory symbol_) external initializer {
+        _name = name_;
+        _symbol = symbol_;
     }
 
-    function tokenURI() external view override returns (string memory) {
-        return _uri;
+    function name() public view override returns (string memory) {
+        return _name;
+    }
+
+    function symbol() public view override returns (string memory) {
+        return _symbol;
     }
 
     function mint(address to, uint256 amount) external {
