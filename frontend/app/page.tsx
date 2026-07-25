@@ -28,6 +28,32 @@ export default function Home() {
           Play
         </a>
       </section>
+
+      {/* The World of Autarch section */}
+      <section className="mx-auto w-full max-w-3xl px-6 py-24">
+        <div className="flex items-center gap-5">
+          <Image
+            src="/reaper-portrait.png"
+            alt="Pixel art portrait of a hooded reaper"
+            width={64}
+            height={64}
+            className="pixelated h-16 w-16 shrink-0 sm:h-20 sm:w-20"
+          />
+          <h2 className="font-pixel text-xl sm:text-3xl tracking-wider text-balance">
+            The World of Autarch
+          </h2>
+        </div>
+
+        <p className="mt-8 text-sm sm:text-base leading-relaxed text-muted-foreground">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+          aliquip ex ea commodo consequat. Duis aute irure dolor in
+          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+          culpa qui officia deserunt mollit anim id est laborum.
+        </p>
+      </section>
     </main>
   );
 }
