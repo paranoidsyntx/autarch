@@ -18,7 +18,7 @@ contract Character721 is ERC721 {
 
     struct Character {
         Autarch.Actor actor;
-        uint256 classIndex;
+        uint256 classId;
     }
 
     Class[] public classes;
@@ -66,7 +66,7 @@ contract Character721 is ERC721 {
         _requireOwned(tokenId);
 
         Character memory character = _characters[tokenId];
-        Class memory class = classes[character.classIndex];
+        Class memory class = classes[character.classId];
 
         string memory svgImage = string.concat(
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><image style="image-rendering: pixelated; image-rendering: crisp-edges;" href="',
@@ -123,7 +123,7 @@ contract Character721 is ERC721 {
 
     function mint(
         string memory _name,
-        uint256 _classIndex
+        uint256 _classId
     ) external returns (uint256 tokenId) {
         _totalCharacters++;
         tokenId = _totalCharacters;
@@ -131,10 +131,10 @@ contract Character721 is ERC721 {
         _characters[tokenId] = Character({
             actor: Autarch.Actor({
                 name: _name,
-                hp: classes[_classIndex].stats.maxHp,
-                stats: classes[_classIndex].stats
+                hp: classes[_classId].stats.maxHp,
+                stats: classes[_classId].stats
             }),
-            classIndex: _classIndex
+            classId: _classId
         });
 
         _mint(msg.sender, tokenId);

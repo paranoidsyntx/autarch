@@ -16,17 +16,37 @@ contract Autarch {
     );
 
     event MonsterCreated(
-        uint256 indexed monsterId
+        uint256 indexed monsterId,
+        string name
     );
 
     event DungeonCreated(
-        uint256 indexed dungeonId
+        uint256 indexed dungeonId,
+        string name,
+        uint256 totalEncounters
     );
 
     event CharacterMinted(
         uint256 indexed tokenId,
         string name,
         uint256 classIndex
+    );
+
+    event DungeonStarted(
+        uint256 indexed characterId,
+        uint256 indexed dungeonId,
+        uint256[] encounterIds
+    );
+
+    event DungeonContinued(
+        uint256 indexed characterId,
+        uint256 encounterId,
+        uint256[] nextEncounterIds
+    );
+
+    event DungeonFinished(
+        uint256 indexed characterId,
+        uint256 encounterId
     );
 
     enum ItemType {
@@ -106,8 +126,19 @@ contract Autarch {
     }
 
     struct Dungeon {
+        string name;
+        uint256 totalEncounters;
+        uint256 restChance; 
+        uint256 monsterChance;
+        uint256 itemChance;
         MonsterEncounter[] monsterEncounters;
         ItemEncounter[] itemEncounters;
+    }
+
+    struct DungeonProgress {
+        uint256 dungeonId;
+        uint256[] encounterIds;
+        uint256 encounterCount;
     }
 
     Character721 public character721;
@@ -120,6 +151,7 @@ contract Autarch {
     Monster[] private _monsters;
 
     Dungeon[] private _dungeons;
+    mapping(uint256 characterId => DungeonProgress) private _dungeonProgress;
 
     constructor() {
         character721 = new Character721("Autarch Character", "aCHAR");
@@ -135,38 +167,66 @@ contract Autarch {
     }
 
     function createItem(
-        string memory _name,
-        string memory _symbol,
-        Item memory _item
+        string memory name,
+        string memory symbol,
+        Item memory data
     ) external returns (address) {
-        return _createItem(_name, _symbol, _item);
+        return _createItem(name, symbol, data);
     }
 
     function createMonster(
-        Actor memory _actor,
-        Effect[] memory _effects
+        Actor memory actor,
+        Effect[] memory effects
     ) external returns (uint256 monsterId) {
         monsterId = _monsters.length;
         _monsters.push();
         
         Monster storage sMonster = _monsters[monsterId];
-        sMonster.actor = _actor;
-        for (uint256 i = 0; i < _effects.length; i++) {
-            sMonster.effects.push(_effects[i]);
+        sMonster.actor = actor;
+        for (uint256 i = 0; i < effects.length; i++) {
+            sMonster.effects.push(effects[i]);
         }
 
-        emit MonsterCreated(monsterId);
+        emit MonsterCreated(monsterId, actor.name);
+    }
+
+    function createDungeon(
+        string memory name,
+        uint256 totalEncounters,
+        uint256 restChance,
+        uint256 monsterChance,
+        uint256 itemChance,
+        MonsterEncounter[] memory monsterEncounters,
+        ItemEncounter[] memory itemEncounters
+    ) external returns (uint256 dungeonId) {
+        dungeonId = _dungeons.length;
+        _dungeons.push();
+
+        Dungeon storage sDungeon = _dungeons[dungeonId];
+        sDungeon.name = name;
+        sDungeon.totalEncounters = totalEncounters;
+        sDungeon.restChance = restChance;
+        sDungeon.monsterChance = monsterChance;
+        sDungeon.itemChance = itemChance;
+        for (uint256 i = 0; i < monsterEncounters.length; i++) {
+            sDungeon.monsterEncounters.push(monsterEncounters[i]);
+        }
+        for (uint256 i = 0; i < itemEncounters.length; i++) {
+            sDungeon.itemEncounters.push(itemEncounters[i]);
+        }
+
+        emit DungeonCreated(dungeonId, name, totalEncounters);
     }
 
     function mintCharacter(
-        string memory _name,
-        uint256 _classIndex
+        string memory name,
+        uint256 classIndex
     ) external returns (uint256 characterId) {
         if (character721.balanceOf(msg.sender) > 0) {
             revert SenderAlreadyHasCharacter(msg.sender);
         }
 
-        characterId = character721.mint(_name, _classIndex);
+        characterId = character721.mint(name, classIndex);
 
         for (uint256 i = 0; i < _startingItems.length; i++) {
             Item20(_startingItems[i].item).mint(
@@ -175,34 +235,149 @@ contract Autarch {
             );
         }
 
-        emit CharacterMinted(characterId, _name, _classIndex);
+        emit CharacterMinted(characterId, name, classIndex);
     }
 
     function startDungeon(
-        uint256 _characterId,
-        uint256 _dungeonId,
-        address _equipment
-    ) external {
+        uint256 dungeonId,
+        uint256 characterId,
+        address[] memory items
+    ) external returns (uint256[] memory encounterIds) {
+        if(_dungeonProgress[characterId].encounterCount > 0) {
+            revert("Character already in a dungeon");
+        }
+        if(dungeonId >= _dungeons.length) {
+            revert("Dungeon does not exist");
+        }
+        if(character721.ownerOf(characterId) != msg.sender) {
+            revert("Character not owned by sender");
+        }
+        if(items.length == 0) {
+            revert("Must at least equip a weapon");
+        }
+        for(uint256 i = 0; i < items.length; i++) {
+            // Allows single item to be equipped multiple times, good enough for hackathon
+            if(Item20(items[i]).balanceOf(msg.sender) < 1) {    
+                revert("Item not owned by sender");
+            }
+        }
 
+        Dungeon memory dungeon = _dungeons[dungeonId];
+
+        encounterIds = _rollEncounters(dungeon, characterId);
+
+        _dungeonProgress[characterId] = DungeonProgress({
+            dungeonId: dungeonId,
+            encounterIds: encounterIds,
+            encounterCount: 1
+        });
+
+        emit DungeonStarted(characterId, dungeonId, encounterIds);
+    }
+
+    function continueDungeon(
+        uint256 characterId,
+        uint256 encounterId
+    ) external returns (uint256[] memory encounterIds) {
+        DungeonProgress memory progress = _dungeonProgress[characterId];
+        if(progress.encounterCount == 0) {
+            revert("Character not in a dungeon");
+        }
+        bool invalidEncounterId = true;
+        for(uint256 i = 0; i < progress.encounterIds.length; i++) {
+            if(progress.encounterIds[i] == encounterId) {
+                invalidEncounterId = false;
+                break;
+            }
+        }
+        if(invalidEncounterId) {
+            revert("Invalid encounter ID");
+        }
+
+        Dungeon memory dungeon = _dungeons[progress.dungeonId];
+
+        if(encounterId == 0) {
+            // Rest
+        } else if(encounterId < dungeon.monsterEncounters.length + 1) {
+            // Monster
+        } else {
+            // Item
+        }
+
+        // Deal with player death
+
+        if(progress.encounterCount == dungeon.totalEncounters) {
+            // Dungeon finished
+            _dungeonProgress[characterId].encounterCount = 0;
+            
+            emit DungeonFinished(characterId, encounterId);
+            return new uint256[](0);
+        }
+
+        encounterIds = _rollEncounters(dungeon, characterId);
+
+        _dungeonProgress[characterId].encounterIds = encounterIds;
+        _dungeonProgress[characterId].encounterCount++;
+
+        emit DungeonContinued(characterId, encounterId, encounterIds);
     }
 
     function _createItem(
-        string memory _name,
-        string memory _symbol,
-        Item memory _item
+        string memory name,
+        string memory symbol,
+        Item memory data
     ) internal returns (address item) {
         item = Clones.clone(address(item20Implementation));
         Item20(item).initialize(
-            _name,
-            _symbol
+            name,
+            symbol
         );
 
         Item storage sItem = _items[item];
-        sItem.itemType = _item.itemType;
-        for (uint256 i = 0; i < _item.effects.length; i++) {
-            sItem.effects.push(_item.effects[i]);
+        sItem.itemType = data.itemType;
+        for (uint256 i = 0; i < data.effects.length; i++) {
+            sItem.effects.push(data.effects[i]);
         }
 
-        emit ItemCreated(item, _name, _symbol);
+        emit ItemCreated(item, name, symbol);
+    }
+
+    function _rollEncounters(
+        Dungeon memory dungeon,
+        uint256 characterId
+    ) internal view returns (uint256[] memory encounterIds) {
+        // Terrible pseudo-random number generation in this function
+        // Easily abused by reverting on unfavorable results, good enough for hackathon
+        uint256 sudoRandom = uint256(keccak256(abi.encodePacked(block.number, block.prevrandao, characterId)));
+        encounterIds = new uint256[](3);
+        for(uint256 i = 0; i < 3; i++) {
+            uint256 typeSum = dungeon.restChance + dungeon.monsterChance + dungeon.itemChance;
+            uint256 typeRoll = sudoRandom % typeSum;
+
+            if(typeRoll < dungeon.restChance) {
+                // Rest
+                encounterIds[i] = 0;
+            } else if(typeRoll < dungeon.restChance + dungeon.monsterChance && dungeon.monsterEncounters.length > 0) {
+                // Monster
+                sudoRandom = uint256(keccak256(abi.encodePacked(sudoRandom)));
+                uint256 sum;
+                for (uint256 j = 0; j < dungeon.monsterEncounters.length; j++) {
+                    sum += dungeon.monsterEncounters[j].chance;
+                }
+                // Offset rest encounter
+                encounterIds[i] = (sudoRandom % sum) + 1;
+            } else {
+                // Item
+                sudoRandom = uint256(keccak256(abi.encodePacked(sudoRandom)));
+                uint256 sum;
+                for (uint256 j = 0; j < dungeon.itemEncounters.length; j++) {
+                    sum += dungeon.itemEncounters[j].chance;
+                }
+                // Offset rest and monster encounters
+                encounterIds[i] = (sudoRandom % sum) + dungeon.monsterEncounters.length + 1;
+            }
+
+            sudoRandom = uint256(keccak256(abi.encodePacked(sudoRandom)));
+        }
     }
 }
