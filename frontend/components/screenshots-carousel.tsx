@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { SectionHeading } from "@/components/section-heading";
 
 const SLIDES = [
-  { id: 1, label: "Screenshot 01" },
-  { id: 2, label: "Screenshot 02" },
-  { id: 3, label: "Screenshot 03" },
-  { id: 4, label: "Screenshot 04" },
+  { id: 1, label: "The Descent" },
+  { id: 2, label: "The Catacombs" },
+  { id: 3, label: "The Throne" },
+  { id: 4, label: "The Sovereign" },
 ];
 
 const AUTOPLAY_MS = 4000;
@@ -20,7 +21,10 @@ export function ScreenshotsCarousel() {
   const touchStartX = useRef<number | null>(null);
   const touchDeltaX = useRef(0);
 
-  const goTo = useCallback((i: number) => setIndex(((i % count) + count) % count), [count]);
+  const goTo = useCallback(
+    (i: number) => setIndex(((i % count) + count) % count),
+    [count],
+  );
   const next = useCallback(() => setIndex((i) => (i + 1) % count), [count]);
 
   // Auto-advance
@@ -50,29 +54,55 @@ export function ScreenshotsCarousel() {
     setPaused(false);
   };
 
+  const pad = (n: number) => String(n).padStart(2, "0");
+
   return (
-    <section className="mx-auto w-full max-w-4xl px-6 py-24">
-      {/* Frame */}
-      <div
-        className="relative overflow-hidden border-2 border-foreground"
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-      >
+    <section className="mx-auto w-full max-w-5xl px-6 py-24 sm:py-32">
+      <SectionHeading kicker="Gallery" title="Screenshots" />
+
+      {/* Framed viewer */}
+      <div className="relative mt-16 border-2 border-foreground sm:mt-20">
+        {/* Gold corner accents */}
+        <span className="absolute -left-[3px] -top-[3px] h-2.5 w-2.5 bg-gold" aria-hidden="true" />
+        <span className="absolute -right-[3px] -top-[3px] h-2.5 w-2.5 bg-gold" aria-hidden="true" />
+        <span className="absolute -bottom-[3px] -left-[3px] h-2.5 w-2.5 bg-gold" aria-hidden="true" />
+        <span className="absolute -bottom-[3px] -right-[3px] h-2.5 w-2.5 bg-gold" aria-hidden="true" />
+
+        {/* Caption bar */}
+        <div className="flex items-center justify-between border-b-2 border-foreground px-4 py-3">
+          <span className="font-pixel text-[10px] uppercase tracking-[0.2em] text-gold sm:text-xs">
+            {SLIDES[index].label}
+          </span>
+          <span className="font-pixel text-[10px] tracking-[0.2em] text-muted-foreground sm:text-xs">
+            {pad(index + 1)} / {pad(count)}
+          </span>
+        </div>
+
+        {/* Slides */}
         <div
-          className="flex transition-transform duration-500 ease-out"
-          style={{ transform: `translateX(-${index * 100}%)` }}
+          className="overflow-hidden"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
         >
-          {SLIDES.map((slide) => (
-            <div
-              key={slide.id}
-              className="flex aspect-video w-full shrink-0 items-center justify-center bg-background"
-            >
-              <span className="font-pixel text-sm sm:text-lg uppercase tracking-wider text-muted-foreground">
-                {slide.label}
-              </span>
-            </div>
-          ))}
+          <div
+            className="flex transition-transform duration-500 ease-out"
+            style={{ transform: `translateX(-${index * 100}%)` }}
+          >
+            {SLIDES.map((slide) => (
+              <div
+                key={slide.id}
+                className="scanlines flex aspect-video w-full shrink-0 flex-col items-center justify-center gap-3 bg-background"
+              >
+                <span className="font-pixel text-sm uppercase tracking-[0.2em] text-foreground sm:text-lg">
+                  {slide.label}
+                </span>
+                <span className="font-pixel text-[9px] uppercase tracking-[0.3em] text-muted-foreground sm:text-[10px]">
+                  Screenshot coming soon
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -85,8 +115,10 @@ export function ScreenshotsCarousel() {
             onClick={() => goTo(i)}
             aria-label={`Go to ${slide.label}`}
             aria-current={i === index}
-            className={`h-4 w-4 border-2 border-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground ${
-              i === index ? "bg-foreground" : "bg-background"
+            className={`h-3.5 w-3.5 rotate-45 border-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
+              i === index
+                ? "border-gold bg-gold"
+                : "border-foreground bg-background hover:border-gold"
             }`}
           />
         ))}

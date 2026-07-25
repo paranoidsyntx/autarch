@@ -28,3 +28,14 @@ body {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
+
+/* Retro CRT scanline texture for placeholder screens */
+.scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.045) 0px,
+    rgba(255, 255, 255, 0.045) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}

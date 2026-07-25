@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ScreenshotsCarousel } from "@/components/screenshots-carousel";
+import { SectionHeading } from "@/components/section-heading";
 
 export default function Home() {
   return (
@@ -31,29 +32,42 @@ export default function Home() {
       </section>
 
       {/* The World of Autarch section */}
-      <section className="mx-auto w-full max-w-3xl px-6 py-24">
-        <div className="flex items-center gap-5">
-          <Image
-            src="/reaper-portrait.png"
-            alt="Pixel art portrait of a hooded reaper"
-            width={64}
-            height={64}
-            className="pixelated h-16 w-16 shrink-0 sm:h-20 sm:w-20"
-          />
-          <h2 className="font-pixel text-xl sm:text-3xl tracking-wider text-balance">
-            The World of Autarch
-          </h2>
-        </div>
+      <section className="mx-auto w-full max-w-5xl px-6 py-24 sm:py-32">
+        <SectionHeading kicker="The Lore" title="The World of Autarch" />
 
-        <p className="mt-8 text-sm sm:text-base leading-relaxed text-muted-foreground">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum.
-        </p>
+        <div className="mt-16 grid items-start gap-10 sm:mt-20 sm:grid-cols-[auto_1fr] sm:gap-14">
+          {/* Framed portrait */}
+          <figure className="mx-auto flex flex-col items-center sm:mx-0">
+            <div className="border-2 border-foreground bg-background p-4">
+              <Image
+                src="/reaper-portrait.png"
+                alt="Pixel art portrait of a hooded reaper"
+                width={64}
+                height={64}
+                className="pixelated h-36 w-36 sm:h-44 sm:w-44"
+              />
+            </div>
+            <figcaption className="font-pixel mt-4 text-[10px] uppercase tracking-[0.3em] text-gold">
+              The Reaper
+            </figcaption>
+          </figure>
+
+          {/* Body copy */}
+          <div className="border-l-2 border-foreground/20 pl-6 sm:pl-10">
+            <p className="text-sm leading-relaxed text-muted-foreground first-letter:mr-3 first-letter:float-left first-letter:font-display first-letter:text-6xl first-letter:leading-none first-letter:text-gold sm:text-base">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+              enim ad minim veniam, quis nostrud exercitation ullamco laboris
+              nisi ut aliquip ex ea commodo consequat.
+            </p>
+            <p className="mt-6 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Duis aute irure dolor in reprehenderit in voluptate velit esse
+              cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+              cupidatat non proident, sunt in culpa qui officia deserunt mollit
+              anim id est laborum.
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* Screenshots carousel section */}
