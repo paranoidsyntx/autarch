@@ -25,8 +25,10 @@ export default function Home() {
         {/* Play button */}
         <a
           href="#play"
-          className="font-pixel mt-10 inline-flex select-none items-center justify-center border-2 border-foreground bg-background px-10 py-5 text-sm sm:text-base uppercase tracking-wider text-foreground transition-colors hover:bg-foreground hover:text-background focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground"
+          className="font-pixel group relative mt-10 inline-flex select-none items-center justify-center border-2 border-gold px-12 py-5 text-sm uppercase tracking-[0.3em] text-gold transition-colors hover:bg-gold hover:text-background focus:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:text-base"
         >
+          {/* pixel drop-shadow offset */}
+          <span className="pointer-events-none absolute inset-0 translate-x-[4px] translate-y-[4px] border-2 border-gold/30 transition-transform group-hover:translate-x-[2px] group-hover:translate-y-[2px]" aria-hidden="true" />
           Play
         </a>
       </section>
