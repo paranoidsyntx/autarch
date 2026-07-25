@@ -17,6 +17,7 @@ contract Character721 is ERC721 {
     }
 
     struct Character {
+        string name;
         Autarch.Actor actor;
         uint256 classId;
     }
@@ -98,7 +99,7 @@ contract Character721 is ERC721 {
 
         string memory uri = string.concat(
             '{"name":"',
-            character.actor.name,
+            character.name,
             '","description":"',
             "Autarch player character",
             '","image":"',
@@ -129,8 +130,8 @@ contract Character721 is ERC721 {
         tokenId = _totalCharacters;
 
         _characters[tokenId] = Character({
+            name: _name,
             actor: Autarch.Actor({
-                name: _name,
                 hp: classes[_classId].stats.maxHp,
                 stats: classes[_classId].stats
             }),

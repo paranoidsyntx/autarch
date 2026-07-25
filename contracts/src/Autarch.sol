@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 import {Character721} from "./Character721.sol";
 import {Item20} from "./Item20.sol";
@@ -38,15 +39,26 @@ contract Autarch {
         uint256[] encounterIds
     );
 
-    event DungeonContinued(
+    event DungeonRest(
         uint256 indexed characterId,
         uint256 encounterId,
+        uint256 prevHp,
+        uint256 newHp,
         uint256[] nextEncounterIds
     );
 
-    event DungeonFinished(
+    event DungeonMonster(
         uint256 indexed characterId,
-        uint256 encounterId
+        uint256 encounterId,
+
+        uint256[] nextEncounterIds
+    );
+
+    event DungeonItem(
+        uint256 indexed characterId,
+        uint256 encounterId,
+        address indexed item,
+        uint256[] nextEncounterIds
     );
 
     enum ItemType {
@@ -88,12 +100,12 @@ contract Autarch {
     }
 
     struct Actor {
-        string name;
         uint256 hp;
         Stats stats;
     }
 
     struct Monster {
+        string name;
         Actor actor;
         Effect[] effects;
     }
@@ -139,6 +151,8 @@ contract Autarch {
         uint256 dungeonId;
         uint256[] encounterIds;
         uint256 encounterCount;
+        Actor character;
+        address[] items;
     }
 
     Character721 public character721;
@@ -175,6 +189,7 @@ contract Autarch {
     }
 
     function createMonster(
+        string memory name,
         Actor memory actor,
         Effect[] memory effects
     ) external returns (uint256 monsterId) {
@@ -182,12 +197,13 @@ contract Autarch {
         _monsters.push();
         
         Monster storage sMonster = _monsters[monsterId];
+        sMonster.name = name;
         sMonster.actor = actor;
         for (uint256 i = 0; i < effects.length; i++) {
             sMonster.effects.push(effects[i]);
         }
 
-        emit MonsterCreated(monsterId, actor.name);
+        emit MonsterCreated(monsterId, name);
     }
 
     function createDungeon(
@@ -199,6 +215,28 @@ contract Autarch {
         MonsterEncounter[] memory monsterEncounters,
         ItemEncounter[] memory itemEncounters
     ) external returns (uint256 dungeonId) {
+        if (restChance + monsterChance + itemChance == 0) {
+            revert("Total chance must be greater than zero");
+        }
+        if (monsterChance > 0) {
+            uint256 sum;
+            for (uint256 i = 0; i < monsterEncounters.length; i++) {
+                sum += monsterEncounters[i].chance;
+            }
+            if (sum == 0) {
+                revert("Monster chance set but no weighted monster encounters");
+            }
+        }
+        if (itemChance > 0) {
+            uint256 sum;
+            for (uint256 i = 0; i < itemEncounters.length; i++) {
+                sum += itemEncounters[i].chance;
+            }
+            if (sum == 0) {
+                revert("Item chance set but no weighted item encounters");
+            }
+        }
+
         dungeonId = _dungeons.length;
         _dungeons.push();
 
@@ -257,7 +295,7 @@ contract Autarch {
         }
         for(uint256 i = 0; i < items.length; i++) {
             // Allows single item to be equipped multiple times, good enough for hackathon
-            if(Item20(items[i]).balanceOf(msg.sender) < 1) {    
+            if(Item20(items[i]).balanceOf(msg.sender) < 1 ether) {    
                 revert("Item not owned by sender");
             }
         }
@@ -269,7 +307,9 @@ contract Autarch {
         _dungeonProgress[characterId] = DungeonProgress({
             dungeonId: dungeonId,
             encounterIds: encounterIds,
-            encounterCount: 1
+            encounterCount: 1,
+            character: character721.getCharacter(characterId),
+            items: items
         });
 
         emit DungeonStarted(characterId, dungeonId, encounterIds);
@@ -296,30 +336,50 @@ contract Autarch {
 
         Dungeon memory dungeon = _dungeons[progress.dungeonId];
 
-        if(encounterId == 0) {
-            // Rest
-        } else if(encounterId < dungeon.monsterEncounters.length + 1) {
-            // Monster
+        if(progress.encounterCount == dungeon.totalEncounters) {
+            // Dungeon finished
+            encounterIds = new uint256[](0);
         } else {
-            // Item
+            // Dungeon continued
+            encounterIds = _rollEncounters(dungeon, characterId);
         }
 
-        // Deal with player death
+        if(encounterId == 0) {
+            // Rest
+            uint256 prevHp = progress.character.hp;
+            uint256 newHp = Math.min(
+                progress.character.stats.maxHp,
+                progress.character.hp + 10
+            );
+
+            _dungeonProgress[characterId].character.hp = newHp;
+
+            emit DungeonRest(characterId, encounterId, prevHp, newHp, encounterIds);
+        } else if(encounterId < dungeon.monsterEncounters.length + 1) {
+            // Monster
+            //uint256 index = encounterId - 1;
+
+            // TODO: Deal with player death or monster defeat
+        } else {
+            // Item
+            uint256 index = encounterId - dungeon.monsterEncounters.length - 1;
+
+            Item20(dungeon.itemEncounters[index].item).mint(
+                character721.ownerOf(characterId),
+                1 ether
+            );
+
+            emit DungeonItem(characterId, encounterId, dungeon.itemEncounters[index].item, encounterIds);
+        }
 
         if(progress.encounterCount == dungeon.totalEncounters) {
             // Dungeon finished
-            _dungeonProgress[characterId].encounterCount = 0;
-            
-            emit DungeonFinished(characterId, encounterId);
-            return new uint256[](0);
+            delete _dungeonProgress[characterId];
+        } else {
+            // Dungeon continued
+            _dungeonProgress[characterId].encounterIds = encounterIds;
+            _dungeonProgress[characterId].encounterCount++;
         }
-
-        encounterIds = _rollEncounters(dungeon, characterId);
-
-        _dungeonProgress[characterId].encounterIds = encounterIds;
-        _dungeonProgress[characterId].encounterCount++;
-
-        emit DungeonContinued(characterId, encounterId, encounterIds);
     }
 
     function _createItem(
@@ -364,8 +424,16 @@ contract Autarch {
                 for (uint256 j = 0; j < dungeon.monsterEncounters.length; j++) {
                     sum += dungeon.monsterEncounters[j].chance;
                 }
-                // Offset rest encounter
-                encounterIds[i] = (sudoRandom % sum) + 1;
+                uint256 roll = sudoRandom % sum;
+                uint256 cumulative;
+                for (uint256 j = 0; j < dungeon.monsterEncounters.length; j++) {
+                    cumulative += dungeon.monsterEncounters[j].chance;
+                    if (roll < cumulative) {
+                        // +1 to offset the rest encounter
+                        encounterIds[i] = j + 1;
+                        break;
+                    }
+                }
             } else {
                 // Item
                 sudoRandom = uint256(keccak256(abi.encodePacked(sudoRandom)));
@@ -373,11 +441,21 @@ contract Autarch {
                 for (uint256 j = 0; j < dungeon.itemEncounters.length; j++) {
                     sum += dungeon.itemEncounters[j].chance;
                 }
-                // Offset rest and monster encounters
-                encounterIds[i] = (sudoRandom % sum) + dungeon.monsterEncounters.length + 1;
+                uint256 roll = sudoRandom % sum;
+                uint256 cumulative;
+                for (uint256 j = 0; j < dungeon.itemEncounters.length; j++) {
+                    cumulative += dungeon.itemEncounters[j].chance;
+                    if (roll < cumulative) {
+                        // Offset the rest and monster encounters
+                        encounterIds[i] = j + dungeon.monsterEncounters.length + 1;
+                        break;
+                    }
+                }
             }
 
             sudoRandom = uint256(keccak256(abi.encodePacked(sudoRandom)));
         }
     }
+
+    
 }

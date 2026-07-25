@@ -25,7 +25,7 @@ contract Deploy is Script {
             - Baldanders' Serum
             - Scale of Sadlark
             - Sarsem's Ward
-            - Ring of Atuloss
+            - Amulet of Atulos
         */
 
         // Gold
@@ -175,15 +175,15 @@ contract Deploy is Script {
             effects: effects
         }));
 
-        // Ring of Atuloss
+        // Amulet of Atulos
         effects = new Autarch.Effect[](1);
         effects[0] = Autarch.Effect({
-            effectTrigger: Autarch.EffectTrigger.PASSIVE,
-            effectType: Autarch.EffectType.ATTACK,
-            value: 1,
-            self: true
+            effectTrigger: Autarch.EffectTrigger.WOUNDED,
+            effectType: Autarch.EffectType.STUN,
+            value: 2,
+            self: false
         });
-        autarch.createItem("Ring of Atuloss", "aRINGOFATULOSS", Autarch.Item({
+        autarch.createItem("Amulet of Atulos", "aAMULETOFATULOS", Autarch.Item({
             itemType: Autarch.ItemType.ITEM,
             effects: effects
         }));
@@ -195,6 +195,7 @@ contract Deploy is Script {
             - Azoth
             - Avern
             - Scythe of Hierax
+            - Axe of Lundor
         */
 
         // Withered Avern
@@ -276,6 +277,19 @@ contract Deploy is Script {
             self: false
         });
         autarch.createItem("Scythe of Hierax", "aSCYTHEOFHIERAX", Autarch.Item({
+            itemType: Autarch.ItemType.WEAPON,
+            effects: effects
+        }));
+
+        // Axe of Lundor
+        effects = new Autarch.Effect[](1);
+        effects[0] = Autarch.Effect({
+            effectTrigger: Autarch.EffectTrigger.TURN_START,
+            effectType: Autarch.EffectType.DAMAGE,
+            value: 3,
+            self: false
+        });
+        autarch.createItem("Axe of Lundor", "aAXEOFLUNDOR", Autarch.Item({
             itemType: Autarch.ItemType.WEAPON,
             effects: effects
         }));
