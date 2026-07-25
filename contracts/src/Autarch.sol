@@ -10,49 +10,50 @@ import {Item20} from "./Item20.sol";
 contract Autarch {
     error SenderAlreadyHasCharacter(address sender);
 
-    event ItemCreated(address indexed item, string name, string symbol);
-
-    event MonsterCreated(uint256 indexed monsterId, string name, uint256 exp);
+    event ItemCreated(
+        address indexed item,
+        bytes32 indexed itemId,
+        string name,
+        string symbol
+    );
 
     event DungeonCreated(
-        uint256 indexed dungeonId,
-        string name,
+        bytes32 indexed dungeonId,
         uint256 totalEncounters
     );
 
     event CharacterMinted(
-        uint256 indexed tokenId,
+        uint256 indexed characterId,
         string name,
         uint256 classIndex
     );
 
     event DungeonStarted(
         uint256 indexed characterId,
-        uint256 indexed dungeonId,
-        uint256[] encounterIds
+        bytes32 indexed dungeonId,
+        uint256[] encounterIndexes
     );
 
     event DungeonRest(
         uint256 indexed characterId,
-        uint256 encounterId,
         uint256 prevHp,
         uint256 newHp,
-        uint256[] nextEncounterIds
+        uint256[] encounterIndexes
     );
 
     event DungeonMonster(
         uint256 indexed characterId,
-        uint256 encounterId,
+        // TODO: Add more data
         uint256 gainedExp,
-        uint256[] nextEncounterIds
+        uint256[] encounterIndexes
     );
 
     event DungeonItem(
         uint256 indexed characterId,
-        uint256 encounterId,
         address indexed item,
+        bytes32 indexed itemId,
         uint256 gainedExp,
-        uint256[] nextEncounterIds
+        uint256[] encounterIndexes
     );
 
     enum ItemType {
@@ -105,7 +106,6 @@ contract Autarch {
     }
 
     struct Monster {
-        string name;
         uint256 exp;
         Actor actor;
         Effect[] effects;
@@ -124,22 +124,21 @@ contract Autarch {
     }
 
     struct StartingItem {
-        address item;
+        bytes32 itemId;
         uint256 amount;
     }
 
     struct MonsterEncounter {
         uint256 chance;
-        uint256 monsterId;
+        bytes32 monsterId;
     }
 
     struct ItemEncounter {
         uint256 chance;
-        address item;
+        bytes32 itemId;
     }
 
     struct Dungeon {
-        string name;
         uint256 totalEncounters;
         uint256 restChance;
         uint256 monsterChance;
@@ -149,11 +148,11 @@ contract Autarch {
     }
 
     struct DungeonProgress {
-        uint256 dungeonId;
-        uint256[] encounterIds;
+        bytes32 dungeonId;
+        uint256[] encounterIndexes;
         uint256 encounterCount;
         Actor character;
-        address[] items;
+        bytes32[] itemIds;
     }
 
     // Mutable per-actor state for a single monster fight. Passed by reference
@@ -165,7 +164,7 @@ contract Autarch {
         Status status; // poison, acid, stun
         bool wounded; // WOUNDED already triggered (fires once per actor)
         bool exposed; // EXPOSED already triggered (fires once per actor)
-        address[] items; // equipped items (character); empty for the monster
+        bytes32[] itemIds; // equipped items (character); empty for the monster
         Effect[] effects; // innate effects (monster); empty for the character
     }
 
@@ -173,12 +172,13 @@ contract Autarch {
 
     Item20 public item20Implementation;
 
-    mapping(address item => ItemData) private _itemData;
+    mapping(bytes32 itemId => address item) private _itemAddresses;
+    mapping(bytes32 itemId => ItemData data) private _itemData;
     StartingItem[] private _startingItems;
 
-    Monster[] private _monsters;
+    mapping(bytes32 monsterId => Monster) private _monsters;
 
-    Dungeon[] private _dungeons;
+    mapping(bytes32 dungeonId => Dungeon) private _dungeons;
     mapping(uint256 characterId => DungeonProgress) private _dungeonProgress;
 
     constructor() {
@@ -199,38 +199,59 @@ contract Autarch {
         string memory symbol,
         ItemData memory data
     ) external returns (address) {
-        return _createItem(name, symbol, data);
+        bytes32 itemId;
+        bytes memory packed = bytes(symbol);
+        require(packed.length <= 32, "Symbol too long");
+        assembly {
+            itemId := mload(add(packed, 32))
+        }
+        if (_itemExists(itemId)) {
+            revert("Item already exists");
+        }
+
+        return _createItem(itemId, name, symbol, data);
+    }
+
+    function _itemExists(bytes32 itemId) internal view returns (bool) {
+        return _itemAddresses[itemId] != address(0);
     }
 
     function createMonster(
-        string memory name,
+        bytes32 monsterId,
         uint256 exp,
         Actor memory actor,
         Effect[] memory effects
-    ) external returns (uint256 monsterId) {
-        monsterId = _monsters.length;
-        _monsters.push();
-
-        Monster storage sMonster = _monsters[monsterId];
-        sMonster.name = name;
-        sMonster.exp = exp;
-        sMonster.actor = actor;
-        for (uint256 i = 0; i < effects.length; i++) {
-            sMonster.effects.push(effects[i]);
+    ) external {
+        if (_monsterExists(monsterId)) {
+            revert("Monster already exists");
+        }
+        if(effects.length == 0) {
+            revert("Effects cannot be empty");
         }
 
-        emit MonsterCreated(monsterId, name, exp);
+        _monsters[monsterId].exp = exp;
+        _monsters[monsterId].actor = actor;
+        for (uint256 i = 0; i < effects.length; i++) {
+            _monsters[monsterId].effects.push(effects[i]);
+        }
+    }
+
+    function _monsterExists(bytes32 monsterId) internal view returns (bool) {
+        return _monsters[monsterId].effects.length > 0;
     }
 
     function createDungeon(
-        string memory name,
+        bytes32 dungeonId,
         uint256 totalEncounters,
         uint256 restChance,
         uint256 monsterChance,
         uint256 itemChance,
         MonsterEncounter[] memory monsterEncounters,
         ItemEncounter[] memory itemEncounters
-    ) external returns (uint256 dungeonId) {
+    ) external {
+        if (_dungeonExists(dungeonId)) {
+            revert("Dungeon already exists");
+        }
         if (restChance + monsterChance + itemChance == 0) {
             revert("Total chance must be greater than zero");
         }
@@ -253,23 +274,22 @@ contract Autarch {
             }
         }
 
-        dungeonId = _dungeons.length;
-        _dungeons.push();
-
-        Dungeon storage sDungeon = _dungeons[dungeonId];
-        sDungeon.name = name;
-        sDungeon.totalEncounters = totalEncounters;
-        sDungeon.restChance = restChance;
-        sDungeon.monsterChance = monsterChance;
-        sDungeon.itemChance = itemChance;
+        _dungeons[dungeonId].totalEncounters = totalEncounters;
+        _dungeons[dungeonId].restChance = restChance;
+        _dungeons[dungeonId].monsterChance = monsterChance;
+        _dungeons[dungeonId].itemChance = itemChance;
         for (uint256 i = 0; i < monsterEncounters.length; i++) {
-            sDungeon.monsterEncounters.push(monsterEncounters[i]);
+            _dungeons[dungeonId].monsterEncounters.push(monsterEncounters[i]);
         }
         for (uint256 i = 0; i < itemEncounters.length; i++) {
-            sDungeon.itemEncounters.push(itemEncounters[i]);
+            _dungeons[dungeonId].itemEncounters.push(itemEncounters[i]);
         }
 
-        emit DungeonCreated(dungeonId, name, totalEncounters);
+        emit DungeonCreated(dungeonId, totalEncounters);
+    }
+
+    function _dungeonExists(bytes32 dungeonId) internal view returns (bool) {
+        return _dungeons[dungeonId].totalEncounters > 0;
     }
 
     function mintCharacter(
@@ -283,7 +303,7 @@ contract Autarch {
         characterId = character721.mint(name, classIndex);
 
         for (uint256 i = 0; i < _startingItems.length; i++) {
-            Item20(_startingItems[i].item).mint(
+            Item20(_itemAddresses[_startingItems[i].itemId]).mint(
                 msg.sender,
                 _startingItems[i].amount
             );
@@ -293,58 +313,58 @@ contract Autarch {
     }
 
     function startDungeon(
-        uint256 dungeonId,
+        bytes32 dungeonId,
         uint256 characterId,
-        address[] memory items
-    ) external returns (uint256[] memory encounterIds) {
+        bytes32[] memory itemIds
+    ) external returns (uint256[] memory encounterIndexes) {
         if (character721.ownerOf(characterId) != msg.sender) {
             revert("Character not owned by sender");
         }
         if (_dungeonProgress[characterId].encounterCount > 0) {
             revert("Character already in a dungeon");
         }
-        if (dungeonId >= _dungeons.length) {
+        if (!_dungeonExists(dungeonId)) {
             revert("Dungeon does not exist");
         }
-        if (items.length == 0) {
+        if (itemIds.length == 0) {
             revert("Must at least equip a weapon");
         }
-        if (_itemData[items[0]].itemType != ItemType.WEAPON) {
-            revert("First item must be a weapon");
-        }
-        for (uint256 i = 0; i < items.length; i++) {
+        for (uint256 i = 0; i < itemIds.length; i++) {
+            if((i == 0 && _itemData[itemIds[i]].itemType != ItemType.WEAPON) || (i > 0 && _itemData[itemIds[i]].itemType != ItemType.ITEM)) {
+                revert("First item must be a weapon, other items must be items");
+            }
             // Allows single item to be equipped multiple times, good enough for hackathon
-            if (Item20(items[i]).balanceOf(msg.sender) < 1 ether) {
+            if (Item20(_itemAddresses[itemIds[i]]).balanceOf(msg.sender) < 1 ether) {
                 revert("Item not owned by sender");
             }
         }
 
         Dungeon memory dungeon = _dungeons[dungeonId];
 
-        encounterIds = _rollEncounters(dungeon, characterId);
+        encounterIndexes = _rollEncounters(dungeon, characterId);
 
         // PASSIVE stat effects from equipped items are applied once, here, so they
         // don't compound (and skew hp/maxHp) if re-applied every encounter.
         Actor memory character = _applyPassiveStats(
             character721.getCharacter(characterId),
-            items
+            itemIds
         );
 
         _dungeonProgress[characterId] = DungeonProgress({
             dungeonId: dungeonId,
-            encounterIds: encounterIds,
+            encounterIndexes: encounterIndexes,
             encounterCount: 1,
             character: character,
-            items: items
+            itemIds: itemIds
         });
 
-        emit DungeonStarted(characterId, dungeonId, encounterIds);
+        emit DungeonStarted(characterId, dungeonId, encounterIndexes);
     }
 
     function continueDungeon(
         uint256 characterId,
-        uint256 encounterId
-    ) external returns (uint256[] memory encounterIds) {
+        uint256 encounterIndex
+    ) external returns (uint256[] memory encounterIndexes) {
         if (character721.ownerOf(characterId) != msg.sender) {
             revert("Character not owned by sender");
         }
@@ -353,27 +373,27 @@ contract Autarch {
             revert("Character not in a dungeon");
         }
         bool invalidEncounterId = true;
-        for (uint256 i = 0; i < progress.encounterIds.length; i++) {
-            if (progress.encounterIds[i] == encounterId) {
+        for (uint256 i = 0; i < progress.encounterIndexes.length; i++) {
+            if (progress.encounterIndexes[i] == encounterIndex) {
                 invalidEncounterId = false;
                 break;
             }
         }
         if (invalidEncounterId) {
-            revert("Invalid encounter ID");
+            revert("Invalid encounter index");
         }
 
         Dungeon memory dungeon = _dungeons[progress.dungeonId];
 
         if (progress.encounterCount == dungeon.totalEncounters) {
             // Dungeon finished
-            encounterIds = new uint256[](0);
+            encounterIndexes = new uint256[](0);
         } else {
             // Dungeon continued
-            encounterIds = _rollEncounters(dungeon, characterId);
+            encounterIndexes = _rollEncounters(dungeon, characterId);
         }
 
-        if (encounterId == 0) {
+        if (encounterIndex == 0) {
             // Rest
             uint256 prevHp = progress.character.hp;
             uint256 newHp = Math.min(
@@ -385,20 +405,19 @@ contract Autarch {
 
             emit DungeonRest(
                 characterId,
-                encounterId,
                 prevHp,
                 newHp,
-                encounterIds
+                encounterIndexes
             );
-        } else if (encounterId < dungeon.monsterEncounters.length + 1) {
+        } else if (encounterIndex < dungeon.monsterEncounters.length + 1) {
             // Monster
             //uint256 index = encounterId - 1;
             // TODO: Deal with player death or monster defeat
         } else {
             // Item
-            uint256 index = encounterId - dungeon.monsterEncounters.length - 1;
+            uint256 index = encounterIndex - dungeon.monsterEncounters.length - 1;
 
-            Item20(dungeon.itemEncounters[index].item).mint(
+            Item20(_itemAddresses[dungeon.itemEncounters[index].itemId]).mint(
                 character721.ownerOf(characterId),
                 1 ether
             );
@@ -407,10 +426,10 @@ contract Autarch {
 
             emit DungeonItem(
                 characterId,
-                encounterId,
-                dungeon.itemEncounters[index].item,
+                _itemAddresses[dungeon.itemEncounters[index].itemId],
+                dungeon.itemEncounters[index].itemId,
                 1,
-                encounterIds
+                encounterIndexes
             );
         }
 
@@ -419,12 +438,13 @@ contract Autarch {
             delete _dungeonProgress[characterId];
         } else {
             // Dungeon continued
-            _dungeonProgress[characterId].encounterIds = encounterIds;
+            _dungeonProgress[characterId].encounterIndexes = encounterIndexes;
             _dungeonProgress[characterId].encounterCount++;
         }
     }
 
     function _createItem(
+        bytes32 itemId,
         string memory name,
         string memory symbol,
         ItemData memory data
@@ -432,13 +452,13 @@ contract Autarch {
         item = Clones.clone(address(item20Implementation));
         Item20(item).initialize(name, symbol);
 
-        ItemData storage sItemData = _itemData[item];
-        sItemData.itemType = data.itemType;
+        _itemData[itemId].itemType = data.itemType;
         for (uint256 i = 0; i < data.effects.length; i++) {
-            sItemData.effects.push(data.effects[i]);
+            _itemData[itemId].effects.push(data.effects[i]);
         }
+        _itemAddresses[itemId] = item;
 
-        emit ItemCreated(item, name, symbol);
+        emit ItemCreated(item, itemId, name, symbol);
     }
 
     function _rollEncounters(
@@ -510,7 +530,7 @@ contract Autarch {
 
     function _resolveMonsterEncounter(
         Actor memory character,
-        address[] memory items,
+        bytes32[] memory itemIds,
         Monster memory monster
     ) internal view returns (Actor memory, MonsterResolution) {
         // Armor is a per-battle depletable shield that resets each fight, so it
@@ -522,7 +542,7 @@ contract Autarch {
             status: Status({poison: 0, acid: 0, stun: 0}),
             wounded: false,
             exposed: false,
-            items: items,
+            itemIds: itemIds,
             effects: new Effect[](0)
         });
         Combatant memory mob = Combatant({
@@ -532,7 +552,7 @@ contract Autarch {
             status: Status({poison: 0, acid: 0, stun: 0}),
             wounded: false,
             exposed: false,
-            items: new address[](0),
+            itemIds: new bytes32[](0),
             effects: monster.effects
         });
 
@@ -684,10 +704,10 @@ contract Autarch {
                 if (self.actor.hp == 0 || other.actor.hp == 0) return true;
             }
         }
-        for (uint256 k = 1; k < self.items.length; k++) {
+        for (uint256 k = 1; k < self.itemIds.length; k++) {
             if (
                 _applyItemTriggeredEffects(
-                    self.items[k],
+                    self.itemIds[k],
                     false,
                     self,
                     other,
@@ -695,10 +715,10 @@ contract Autarch {
                 )
             ) return true;
         }
-        if (self.items.length > 0) {
+        if (self.itemIds.length > 0) {
             return
                 _applyItemTriggeredEffects(
-                    self.items[0],
+                    self.itemIds[0],
                     true,
                     self,
                     other,
@@ -709,13 +729,13 @@ contract Autarch {
     }
 
     function _applyItemTriggeredEffects(
-        address item,
+        bytes32 itemId,
         bool isWeapon,
         Combatant memory self,
         Combatant memory other,
         EffectTrigger trigger
     ) internal view returns (bool) {
-        Effect[] memory effects = _itemData[item].effects;
+        Effect[] memory effects = _itemData[itemId].effects;
         for (uint256 i = 0; i < effects.length; i++) {
             if (effects[i].effectTrigger == trigger) {
                 _applyEffect(self, other, effects[i], isWeapon);
@@ -777,11 +797,11 @@ contract Autarch {
 
     function _applyPassiveStats(
         Actor memory actor,
-        address[] memory items
+        bytes32[] memory itemIds
     ) internal view returns (Actor memory) {
         // PASSIVE effects are assumed to be stat increases only.
-        for (uint256 k = 0; k < items.length; k++) {
-            Effect[] memory effects = _itemData[items[k]].effects;
+        for (uint256 k = 0; k < itemIds.length; k++) {
+            Effect[] memory effects = _itemData[itemIds[k]].effects;
             for (uint256 i = 0; i < effects.length; i++) {
                 Effect memory effect = effects[i];
                 if (

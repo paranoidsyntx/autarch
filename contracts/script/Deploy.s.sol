@@ -11,6 +11,40 @@ contract Deploy is Script {
 
         Autarch autarch = new Autarch();
 
+        _createItems(autarch);
+        _createWeapons(autarch);
+
+        /*
+            Set starting items
+            - Gold (10)
+            - Osherl's Mercy (1)
+            - Withered Avern (1)
+        */
+
+        Autarch.StartingItem[]
+            memory startingItems = new Autarch.StartingItem[](3);
+        startingItems[0] = Autarch.StartingItem({
+            itemId: bytes32("aGOLD"),
+            amount: 10 ether
+        });
+        startingItems[1] = Autarch.StartingItem({
+            itemId: bytes32("aOSHERLSMERCY"),
+            amount: 1 ether
+        });
+        startingItems[2] = Autarch.StartingItem({
+            itemId: bytes32("aWITHEREDAVERN"),
+            amount: 1 ether
+        });
+        autarch.setStartingItems(startingItems);
+
+        vm.stopBroadcast();
+
+        console2.log("Autarch: ", address(autarch));
+    }
+
+    function _createItems(
+        Autarch autarch
+    ) internal {
         Autarch.Effect[] memory effects;
 
         /*
@@ -29,10 +63,14 @@ contract Deploy is Script {
         */
 
         // Gold
-        address gold = autarch.createItem("Gold", "aGOLD", Autarch.ItemData({
-            itemType: Autarch.ItemType.ITEM,
-            effects: new Autarch.Effect[](0)
-        }));
+        autarch.createItem(
+            "Gold",
+            "aGOLD",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.ITEM,
+                effects: new Autarch.Effect[](0)
+            })
+        );
 
         // Osherl's Mercy
         effects = new Autarch.Effect[](1);
@@ -42,10 +80,14 @@ contract Deploy is Script {
             value: 4,
             self: true
         });
-        address osherlsMercy = autarch.createItem("Osherl's Mercy", "aOSHERLSMERCY", Autarch.ItemData({
-            itemType: Autarch.ItemType.ITEM,
-            effects: effects
-        }));
+        autarch.createItem(
+            "Osherl's Mercy",
+            "aOSHERLSMERCY",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.ITEM,
+                effects: effects
+            })
+        );
 
         // Mazirian's Boots
         effects = new Autarch.Effect[](2);
@@ -61,10 +103,14 @@ contract Deploy is Script {
             value: 1,
             self: true
         });
-        autarch.createItem("Mazirian's Boots", "aMAZIRIANSBOOTS", Autarch.ItemData({
-            itemType: Autarch.ItemType.ITEM,
-            effects: effects
-        }));
+        autarch.createItem(
+            "Mazirian's Boots",
+            "aMAZIRIANSBOOTS",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.ITEM,
+                effects: effects
+            })
+        );
 
         // IOUN Stone
         effects = new Autarch.Effect[](3);
@@ -86,10 +132,14 @@ contract Deploy is Script {
             value: 1,
             self: true
         });
-        autarch.createItem("IOUN Stone", "aIOUNSTONE", Autarch.ItemData({
-            itemType: Autarch.ItemType.ITEM,
-            effects: effects
-        }));
+        autarch.createItem(
+            "IOUN Stone",
+            "aIOUNSTONE",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.ITEM,
+                effects: effects
+            })
+        );
 
         // Conciliator's Claw
         effects = new Autarch.Effect[](2);
@@ -105,10 +155,14 @@ contract Deploy is Script {
             value: 5,
             self: true
         });
-        autarch.createItem("Conciliator's Claw", "aCONCILIATORSCLAW", Autarch.ItemData({
-            itemType: Autarch.ItemType.ITEM,
-            effects: effects
-        }));
+        autarch.createItem(
+            "Conciliator's Claw",
+            "aCONCILIATORSCLAW",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.ITEM,
+                effects: effects
+            })
+        );
 
         // Fuligin Cloak
         effects = new Autarch.Effect[](1);
@@ -118,10 +172,14 @@ contract Deploy is Script {
             value: 2,
             self: true
         });
-        autarch.createItem("Fuligin Cloak", "aFULIGINCLOAK", Autarch.ItemData({
-            itemType: Autarch.ItemType.ITEM,
-            effects: effects
-        }));
+        autarch.createItem(
+            "Fuligin Cloak",
+            "aFULIGINCLOAK",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.ITEM,
+                effects: effects
+            })
+        );
 
         // Prismatic Spray
         effects = new Autarch.Effect[](1);
@@ -131,10 +189,14 @@ contract Deploy is Script {
             value: 3,
             self: false
         });
-        autarch.createItem("Prismatic Spray", "aPRISMATICSPRAY", Autarch.ItemData({
-            itemType: Autarch.ItemType.ITEM,
-            effects: effects
-        }));
+        autarch.createItem(
+            "Prismatic Spray",
+            "aPRISMATICSPRAY",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.ITEM,
+                effects: effects
+            })
+        );
 
         // Baldanders' Serum
         effects = new Autarch.Effect[](1);
@@ -144,10 +206,14 @@ contract Deploy is Script {
             value: 7,
             self: true
         });
-        autarch.createItem("Baldanders' Serum", "aBALDANDERSSErum", Autarch.ItemData({
-            itemType: Autarch.ItemType.ITEM,
-            effects: effects
-        }));
+        autarch.createItem(
+            "Baldanders' Serum",
+            "aBALDANDERSSErum",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.ITEM,
+                effects: effects
+            })
+        );
 
         // Sarsem's Ward
         effects = new Autarch.Effect[](1);
@@ -157,10 +223,14 @@ contract Deploy is Script {
             value: 5,
             self: true
         });
-        autarch.createItem("Sarsem's Ward", "aSARSEMSWARD", Autarch.ItemData({
-            itemType: Autarch.ItemType.ITEM,
-            effects: effects
-        }));
+        autarch.createItem(
+            "Sarsem's Ward",
+            "aSARSEMSWARD",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.ITEM,
+                effects: effects
+            })
+        );
 
         // Scale of Sadlark
         effects = new Autarch.Effect[](1);
@@ -170,10 +240,14 @@ contract Deploy is Script {
             value: 3,
             self: true
         });
-        autarch.createItem("Scale of Sadlark", "aSCALEOFSADLARK", Autarch.ItemData({
-            itemType: Autarch.ItemType.ITEM,
-            effects: effects
-        }));
+        autarch.createItem(
+            "Scale of Sadlark",
+            "aSCALEOFSADLARK",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.ITEM,
+                effects: effects
+            })
+        );
 
         // Amulet of Atulos
         effects = new Autarch.Effect[](1);
@@ -183,10 +257,20 @@ contract Deploy is Script {
             value: 2,
             self: false
         });
-        autarch.createItem("Amulet of Atulos", "aAMULETOFATULOS", Autarch.ItemData({
-            itemType: Autarch.ItemType.ITEM,
-            effects: effects
-        }));
+        autarch.createItem(
+            "Amulet of Atulos",
+            "aAMULETOFATULOS",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.ITEM,
+                effects: effects
+            })
+        );
+    }
+
+    function _createWeapons(
+        Autarch autarch
+    ) internal {
+        Autarch.Effect[] memory effects;
 
         /* 
             Create weapons
@@ -206,10 +290,14 @@ contract Deploy is Script {
             value: 1,
             self: false
         });
-        address witheredAvern = autarch.createItem("Withered Avern", "aWITHEREDAVERN", Autarch.ItemData({
-            itemType: Autarch.ItemType.WEAPON,
-            effects: effects
-        }));
+        autarch.createItem(
+            "Withered Avern",
+            "aWITHEREDAVERN",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.WEAPON,
+                effects: effects
+            })
+        );
 
         // Terminus Est
         effects = new Autarch.Effect[](2);
@@ -225,10 +313,14 @@ contract Deploy is Script {
             value: 4,
             self: false
         });
-        autarch.createItem("Terminus Est", "aTERMINUSEST", Autarch.ItemData({
-            itemType: Autarch.ItemType.WEAPON,
-            effects: effects
-        }));
+        autarch.createItem(
+            "Terminus Est",
+            "aTERMINUSEST",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.WEAPON,
+                effects: effects
+            })
+        );
 
         // Azoth
         effects = new Autarch.Effect[](1);
@@ -238,10 +330,14 @@ contract Deploy is Script {
             value: 5,
             self: false
         });
-        autarch.createItem("Azoth", "aAZOTH", Autarch.ItemData({
-            itemType: Autarch.ItemType.WEAPON,
-            effects: effects
-        }));
+        autarch.createItem(
+            "Azoth",
+            "aAZOTH",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.WEAPON,
+                effects: effects
+            })
+        );
 
         // Avern
         effects = new Autarch.Effect[](2);
@@ -257,10 +353,14 @@ contract Deploy is Script {
             value: 1,
             self: false
         });
-        autarch.createItem("Avern", "aAVERN", Autarch.ItemData({
-            itemType: Autarch.ItemType.WEAPON,
-            effects: effects
-        }));
+        autarch.createItem(
+            "Avern",
+            "aAVERN",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.WEAPON,
+                effects: effects
+            })
+        );
 
         // Scythe of Hierax
         effects = new Autarch.Effect[](2);
@@ -276,10 +376,14 @@ contract Deploy is Script {
             value: 2,
             self: false
         });
-        autarch.createItem("Scythe of Hierax", "aSCYTHEOFHIERAX", Autarch.ItemData({
-            itemType: Autarch.ItemType.WEAPON,
-            effects: effects
-        }));
+        autarch.createItem(
+            "Scythe of Hierax",
+            "aSCYTHEOFHIERAX",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.WEAPON,
+                effects: effects
+            })
+        );
 
         // Axe of Lundor
         effects = new Autarch.Effect[](1);
@@ -289,35 +393,17 @@ contract Deploy is Script {
             value: 3,
             self: false
         });
-        autarch.createItem("Axe of Lundor", "aAXEOFLUNDOR", Autarch.ItemData({
-            itemType: Autarch.ItemType.WEAPON,
-            effects: effects
-        }));
-
-        /*
-            Set starting items
-            - Gold (10)
-            - Osherl's Mercy (1)
-            - Withered Avern (1)
-        */
-
-        Autarch.StartingItem[] memory startingItems = new Autarch.StartingItem[](3);
-        startingItems[0] = Autarch.StartingItem({
-            item: address(gold),
-            amount: 10 ether
-        });
-        startingItems[1] = Autarch.StartingItem({  
-            item: address(osherlsMercy),
-            amount: 1 ether
-        });
-        startingItems[2] = Autarch.StartingItem({
-            item: address(witheredAvern),
-            amount: 1 ether
-        });
-        autarch.setStartingItems(startingItems);
-
-        vm.stopBroadcast();
-
-        console2.log("Autarch: ", address(autarch));
+        autarch.createItem(
+            "Axe of Lundor",
+            "aAXEOFLUNDOR",
+            Autarch.ItemData({
+                itemType: Autarch.ItemType.WEAPON,
+                effects: effects
+            })
+        );
     }
+
+    function _createMonsters(Autarch autarch) internal {}
+
+    function _createDungeons(Autarch autarch) internal {}
 }
