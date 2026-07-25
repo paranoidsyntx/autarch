@@ -15,6 +15,14 @@ contract Autarch {
         string symbol
     );
 
+    event MonsterCreated(
+        uint256 indexed monsterId
+    );
+
+    event DungeonCreated(
+        uint256 indexed dungeonId
+    );
+
     event CharacterMinted(
         uint256 indexed tokenId,
         string name,
@@ -65,6 +73,11 @@ contract Autarch {
         Stats stats;
     }
 
+    struct Monster {
+        Actor actor;
+        Effect[] effects;
+    }
+
     struct Effect {
         EffectTrigger effectTrigger;
         EffectType effectType;
@@ -82,13 +95,31 @@ contract Autarch {
         uint256 amount;
     }
 
+    struct MonsterEncounter {
+        uint256 chance;
+        uint256 monsterId;
+    }
+
+    struct ItemEncounter {
+        uint256 chance;
+        address item;
+    }
+
+    struct Dungeon {
+        MonsterEncounter[] monsterEncounters;
+        ItemEncounter[] itemEncounters;
+    }
+
     Character721 public character721;
 
     Item20 public item20Implementation;
 
-    mapping(address item => Item) public items;
+    mapping(address item => Item) private _items;
+    StartingItem[] private _startingItems;
 
-    StartingItem[] public startingItems;
+    Monster[] private _monsters;
+
+    Dungeon[] private _dungeons;
 
     constructor() {
         character721 = new Character721("Autarch Character", "aCHAR");
@@ -96,10 +127,10 @@ contract Autarch {
         item20Implementation = new Item20();
     }
 
-    function setStartingItems(StartingItem[] memory _startingItems) external {
-        delete startingItems;
-        for (uint256 i = 0; i < _startingItems.length; i++) {
-            startingItems.push(_startingItems[i]);
+    function setStartingItems(StartingItem[] memory newStartingItems) external {
+        delete _startingItems;
+        for (uint256 i = 0; i < newStartingItems.length; i++) {
+            _startingItems.push(newStartingItems[i]);
         }
     }
 
@@ -109,6 +140,22 @@ contract Autarch {
         Item memory _item
     ) external returns (address) {
         return _createItem(_name, _symbol, _item);
+    }
+
+    function createMonster(
+        Actor memory _actor,
+        Effect[] memory _effects
+    ) external returns (uint256 monsterId) {
+        monsterId = _monsters.length;
+        _monsters.push();
+        
+        Monster storage sMonster = _monsters[monsterId];
+        sMonster.actor = _actor;
+        for (uint256 i = 0; i < _effects.length; i++) {
+            sMonster.effects.push(_effects[i]);
+        }
+
+        emit MonsterCreated(monsterId);
     }
 
     function mintCharacter(
@@ -121,14 +168,22 @@ contract Autarch {
 
         characterId = character721.mint(_name, _classIndex);
 
-        for (uint256 i = 0; i < startingItems.length; i++) {
-            Item20(startingItems[i].item).mint(
+        for (uint256 i = 0; i < _startingItems.length; i++) {
+            Item20(_startingItems[i].item).mint(
                 msg.sender,
-                startingItems[i].amount
+                _startingItems[i].amount
             );
         }
 
         emit CharacterMinted(characterId, _name, _classIndex);
+    }
+
+    function startDungeon(
+        uint256 _characterId,
+        uint256 _dungeonId,
+        address _equipment
+    ) external {
+
     }
 
     function _createItem(
@@ -142,7 +197,7 @@ contract Autarch {
             _symbol
         );
 
-        Item storage sItem = items[item];
+        Item storage sItem = _items[item];
         sItem.itemType = _item.itemType;
         for (uint256 i = 0; i < _item.effects.length; i++) {
             sItem.effects.push(_item.effects[i]);

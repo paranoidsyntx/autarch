@@ -25,6 +25,7 @@ contract Deploy is Script {
             - Baldanders' Serum
             - Scale of Sadlark
             - Sarsem's Ward
+            - Ring of Atuloss
         */
 
         // Gold
@@ -170,6 +171,19 @@ contract Deploy is Script {
             self: true
         });
         autarch.createItem("Scale of Sadlark", "aSCALEOFSADLARK", Autarch.Item({
+            itemType: Autarch.ItemType.ITEM,
+            effects: effects
+        }));
+
+        // Ring of Atuloss
+        effects = new Autarch.Effect[](1);
+        effects[0] = Autarch.Effect({
+            effectTrigger: Autarch.EffectTrigger.PASSIVE,
+            effectType: Autarch.EffectType.ATTACK,
+            value: 1,
+            self: true
+        });
+        autarch.createItem("Ring of Atuloss", "aRINGOFATULOSS", Autarch.Item({
             itemType: Autarch.ItemType.ITEM,
             effects: effects
         }));
