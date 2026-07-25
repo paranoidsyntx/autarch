@@ -56,10 +56,10 @@ export function ScreenshotsCarousel() {
 
   return (
     <section className="mx-auto w-full max-w-5xl px-6 py-24 sm:py-32">
-      <SectionHeading kicker="Gallery" title="Screenshots" />
+      <SectionHeading title="Screenshots" />
 
       {/* Framed viewer */}
-      <div className="relative mt-16 border-2 border-foreground sm:mt-20">
+      <div className="relative mt-8 border-2 border-foreground">
         {/* Slides */}
         <div
           className="overflow-hidden"
