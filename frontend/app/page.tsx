@@ -36,24 +36,19 @@ export default function Home() {
         <SectionHeading kicker="The Lore" title="The World of Autarch" />
 
         <div className="mt-16 grid items-start gap-10 sm:mt-20 sm:grid-cols-[auto_1fr] sm:gap-14">
-          {/* Framed portrait */}
-          <figure className="mx-auto flex flex-col items-center sm:mx-0">
-            <div className="border-2 border-foreground bg-background p-4">
-              <Image
-                src="/reaper-portrait.png"
-                alt="Pixel art portrait of a hooded reaper"
-                width={64}
-                height={64}
-                className="pixelated h-36 w-36 sm:h-44 sm:w-44"
-              />
-            </div>
-            <figcaption className="font-pixel mt-4 text-[10px] uppercase tracking-[0.3em] text-gold">
-              The Reaper
-            </figcaption>
-          </figure>
+          {/* Swords sprite */}
+          <div className="mx-auto flex items-center justify-center sm:mx-0">
+            <Image
+              src="/swords.png"
+              alt="Pixel art crossed swords"
+              width={64}
+              height={64}
+              className="pixelated h-36 w-36 sm:h-44 sm:w-44"
+            />
+          </div>
 
           {/* Body copy */}
-          <div className="border-l-2 border-foreground/20 pl-6 sm:pl-10">
+          <div>
             <p className="text-sm leading-relaxed text-muted-foreground first-letter:mr-3 first-letter:float-left first-letter:font-display first-letter:text-6xl first-letter:leading-none first-letter:text-gold sm:text-base">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
               eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
