@@ -4,12 +4,14 @@
   --background: #000000;
   --foreground: #ffffff;
   --muted-foreground: #a1a1a1;
+  --gold: #d4af37;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted-foreground: var(--muted-foreground);
+  --color-gold: var(--gold);
   --font-pixel: var(--font-pixel);
   --font-display: var(--font-display);
   --font-sans: var(--font-sans);

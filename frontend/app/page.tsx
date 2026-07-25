@@ -17,7 +17,7 @@ export default function Home() {
         />
 
         {/* Title */}
-        <h1 className="font-display mt-12 text-center text-7xl sm:text-9xl leading-none text-balance">
+        <h1 className="font-display mt-12 text-center text-[9rem] sm:text-[16rem] leading-none text-balance text-gold">
           Autarch
         </h1>
 
