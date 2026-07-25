@@ -5,6 +5,7 @@
   --foreground: #ffffff;
   --muted-foreground: #a1a1a1;
   --gold: #ffdd00;
+  --accent: #d1402f;
 }
 
 @theme inline {
@@ -12,6 +13,7 @@
   --color-foreground: var(--foreground);
   --color-muted-foreground: var(--muted-foreground);
   --color-gold: var(--gold);
+  --color-accent: var(--accent);
   --font-pixel: var(--font-pixel);
   --font-display: var(--font-display);
   --font-sans: var(--font-sans);

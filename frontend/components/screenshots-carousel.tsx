@@ -97,10 +97,10 @@ export function ScreenshotsCarousel() {
             onClick={() => goTo(i)}
             aria-label={`Go to ${slide.label}`}
             aria-current={i === index}
-            className={`h-3.5 w-3.5 rotate-45 border-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
+            className={`h-3.5 w-3.5 rotate-45 border-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
               i === index
-                ? "border-gold bg-gold"
-                : "border-foreground bg-background hover:border-gold"
+                ? "border-accent bg-accent"
+                : "border-foreground bg-background hover:border-accent"
             }`}
           />
         ))}

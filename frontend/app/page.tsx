@@ -25,7 +25,7 @@ export default function Home() {
         {/* Play button */}
         <a
           href="#play"
-          className="font-pixel mt-10 inline-flex select-none items-center justify-center border-2 border-gold bg-gold px-12 py-3 text-sm uppercase tracking-[0.3em] text-background transition-colors hover:bg-transparent hover:text-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:text-base"
+          className="font-pixel mt-10 inline-flex select-none items-center justify-center border-2 border-accent bg-transparent px-12 py-3 text-sm uppercase tracking-[0.3em] text-accent transition-colors hover:bg-accent hover:text-background focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:text-base"
         >
           Play
         </a>
@@ -49,7 +49,7 @@ export default function Home() {
 
           {/* Body copy */}
           <div>
-            <p className="text-sm leading-relaxed text-muted-foreground first-letter:mr-3 first-letter:float-left first-letter:font-display first-letter:text-6xl first-letter:leading-none first-letter:text-gold sm:text-base">
+            <p className="text-sm leading-relaxed text-muted-foreground first-letter:mr-3 first-letter:float-left first-letter:font-display first-letter:text-6xl first-letter:leading-none first-letter:text-accent sm:text-base">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
               eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
               enim ad minim veniam, quis nostrud exercitation ullamco laboris
@@ -83,7 +83,7 @@ export default function Home() {
 
           {/* Body copy */}
           <div>
-            <p className="text-sm leading-relaxed text-muted-foreground first-letter:mr-3 first-letter:float-left first-letter:font-display first-letter:text-6xl first-letter:leading-none first-letter:text-gold sm:text-base">
+            <p className="text-sm leading-relaxed text-muted-foreground first-letter:mr-3 first-letter:float-left first-letter:font-display first-letter:text-6xl first-letter:leading-none first-letter:text-accent sm:text-base">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
               eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
               enim ad minim veniam, quis nostrud exercitation ullamco laboris
