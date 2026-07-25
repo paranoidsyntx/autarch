@@ -12,7 +12,7 @@ export default function Home() {
           width={320}
           height={80}
           priority
-          className="pixelated w-full h-auto object-cover"
+          className="pixelated -mt-[8.3vw] w-full h-auto object-cover"
         />
 
         {/* Title */}
