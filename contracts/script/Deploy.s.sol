@@ -25,7 +25,6 @@ contract Deploy is Script {
             - Baldanders' Serum
             - Scale of Sadlark
             - Sarsem's Ward
-            - Alzabo Blood
         */
 
         // Gold
@@ -150,10 +149,30 @@ contract Deploy is Script {
         }));
 
         // Sarsem's Ward
+        effects = new Autarch.Effect[](1);
+        effects[0] = Autarch.Effect({
+            effectTrigger: Autarch.EffectTrigger.EXPOSED,
+            effectType: Autarch.EffectType.ARMOR,
+            value: 5,
+            self: true
+        });
+        autarch.createItem("Sarsem's Ward", "aSARSEMSWARD", Autarch.Item({
+            itemType: Autarch.ItemType.ITEM,
+            effects: effects
+        }));
 
         // Scale of Sadlark
-
-        // Alzabo Blood
+        effects = new Autarch.Effect[](1);
+        effects[0] = Autarch.Effect({
+            effectTrigger: Autarch.EffectTrigger.PASSIVE,
+            effectType: Autarch.EffectType.ARMOR,
+            value: 3,
+            self: true
+        });
+        autarch.createItem("Scale of Sadlark", "aSCALEOFSADLARK", Autarch.Item({
+            itemType: Autarch.ItemType.ITEM,
+            effects: effects
+        }));
 
         /* 
             Create weapons
@@ -161,7 +180,7 @@ contract Deploy is Script {
             - Terminus Est
             - Azoth
             - Avern
-            - 
+            - Scythe of Hierax
         */
 
         // Withered Avern
@@ -180,16 +199,16 @@ contract Deploy is Script {
         // Terminus Est
         effects = new Autarch.Effect[](2);
         effects[0] = Autarch.Effect({
-            effectTrigger: Autarch.EffectTrigger.TURN_START,
-            effectType: Autarch.EffectType.DAMAGE,
-            value: 4,
-            self: false
-        });
-        effects[1] = Autarch.Effect({
             effectTrigger: Autarch.EffectTrigger.PASSIVE,
             effectType: Autarch.EffectType.SPEED,
             value: 1,
             self: true
+        });
+        effects[1] = Autarch.Effect({
+            effectTrigger: Autarch.EffectTrigger.TURN_START,
+            effectType: Autarch.EffectType.DAMAGE,
+            value: 4,
+            self: false
         });
         autarch.createItem("Terminus Est", "aTERMINUSEST", Autarch.Item({
             itemType: Autarch.ItemType.WEAPON,
@@ -224,6 +243,25 @@ contract Deploy is Script {
             self: false
         });
         autarch.createItem("Avern", "aAVERN", Autarch.Item({
+            itemType: Autarch.ItemType.WEAPON,
+            effects: effects
+        }));
+
+        // Scythe of Hierax
+        effects = new Autarch.Effect[](2);
+        effects[0] = Autarch.Effect({
+            effectTrigger: Autarch.EffectTrigger.WOUNDED,
+            effectType: Autarch.EffectType.ATTACK,
+            value: 3,
+            self: true
+        });
+        effects[1] = Autarch.Effect({
+            effectTrigger: Autarch.EffectTrigger.TURN_START,
+            effectType: Autarch.EffectType.DAMAGE,
+            value: 2,
+            self: false
+        });
+        autarch.createItem("Scythe of Hierax", "aSCYTHEOFHIERAX", Autarch.Item({
             itemType: Autarch.ItemType.WEAPON,
             effects: effects
         }));
