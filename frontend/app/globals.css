@@ -11,6 +11,7 @@
   --color-foreground: var(--foreground);
   --color-muted-foreground: var(--muted-foreground);
   --font-pixel: var(--font-pixel);
+  --font-display: var(--font-display);
   --font-sans: var(--font-sans);
 }
 

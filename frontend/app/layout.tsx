@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
-import { Press_Start_2P, Geist } from "next/font/google";
+import { Press_Start_2P, Jacquard_24, Geist } from "next/font/google";
 import "./globals.css";
 
 const pressStart = Press_Start_2P({
   variable: "--font-pixel",
+  weight: "400",
+  subsets: ["latin"],
+});
+
+const jacquard = Jacquard_24({
+  variable: "--font-display",
   weight: "400",
   subsets: ["latin"],
 });
@@ -26,7 +32,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${pressStart.variable} ${geist.variable} h-full antialiased bg-background`}
+      className={`${pressStart.variable} ${jacquard.variable} ${geist.variable} h-full antialiased bg-background`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
