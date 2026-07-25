@@ -1,14 +1,10 @@
 type SectionHeadingProps = {
-  kicker: string;
   title: string;
 };
 
-export function SectionHeading({ kicker, title }: SectionHeadingProps) {
+export function SectionHeading({ title }: SectionHeadingProps) {
   return (
     <div className="flex flex-col items-center text-center">
-      <span className="font-pixel text-[10px] sm:text-xs uppercase tracking-[0.35em] text-gold">
-        {kicker}
-      </span>
       <h2 className="font-display mt-5 text-6xl sm:text-8xl leading-none text-balance text-foreground">
         {title}
       </h2>
