@@ -518,7 +518,7 @@ contract Autarch {
             _applyBattleStart(char, mob);
         }
 
-        for (uint256 round = 0; round < 50; round++) {
+        for (uint256 round = 0; round < 25; round++) {
             // Turn order is re-evaluated each round so mid-battle SPEED changes
             // take effect: higher speed acts first, ties favor the monster.
             bool characterFirst = char.actor.stats.speed > mob.actor.stats.speed;
@@ -538,13 +538,42 @@ contract Autarch {
             }
         }
 
-        // 50-round cap reached: the monster flees and the character survives with
+        // 25-round cap reached: the monster flees and the character survives with
         // whatever HP they have left.
         return (char.actor, MonsterResolution.FLED);
     }
 
     function _takeTurn(Combatant memory self, Combatant memory other) internal view {
-        // TODO: if STUN causes this turn to be skipped, return before taking any action.
+        // ACID damages armor, if it has any, and is resolved before TURN_START.
+        // It does not reduce over time.
+        if(self.status.acid > 0 && self.armor > 0) {
+            if(self.status.acid > self.armor) {
+                self.armor = 0;
+            } else {
+                self.armor -= self.status.acid;
+            }
+        }
+
+        // POISON damages HP, if armor is 0, and is resolved before TURN_START.
+        // It reduces 1 stack per turn.
+        if(self.status.poison > 0) {
+            if(self.armor == 0) {
+                _dealDamage(self, self.status.poison);
+                if(self.actor.hp == 0) {
+                    // Death
+                    return;
+                }
+            }
+
+            self.status.poison--;
+        }
+
+        // A stunned actor skips their entire turn: no WOUNDED/EXPOSED checks, no
+        // TURN_START, and no attack. Each skipped turn consumes one stack of STUN.
+        if (self.status.stun > 0) {
+            self.status.stun--;
+            return;
+        }
 
         // WOUNDED and EXPOSED are evaluated at the start of the actor's own turn
         // (from damage dealt since their last turn), before TURN_START. Each fires
@@ -552,7 +581,7 @@ contract Autarch {
         _checkWounded(self, other);
         _checkExposed(self, other);
 
-        // TURN_START hook: tick POISON/ACID, resolve STUN, apply TURN_START effects.
+        // TURN_START hook: Apply TURN_START effects.
         _applyTurnStart(self, other);
 
         // The attack is the actor applying its DAMAGE. For the character this means
@@ -584,8 +613,8 @@ contract Autarch {
     }
 
     function _applyTurnStart(Combatant memory self, Combatant memory other) internal pure {
-        // TODO: tick POISON/ACID from self.status, resolve STUN, then apply self's
-        //       TURN_START-triggered effects.
+        // STUN is resolved before this hook (see _takeTurn).
+        // TODO: Apply self's TURN_START-triggered effects.
     }
 
     function _checkWounded(Combatant memory self, Combatant memory /* other */) internal pure {
@@ -642,17 +671,17 @@ contract Autarch {
         Combatant memory self,
         Combatant memory other
     ) internal view {
-        Effect[] storage effects = _itemData[item].effects;
+        Effect[] memory effects = _itemData[item].effects;
         for (uint256 i = 0; i < effects.length; i++) {
-            Effect storage effect = effects[i];
+            Effect memory effect = effects[i];
 
-            if (effect.effectType == EffectType.DAMAGE && !effect.self && effect.value > 0) {
+            if (effect.effectType == EffectType.DAMAGE && effect.value > 0) {
                 uint256 damage = effect.value;
                 // Only the weapon's DAMAGE effect adds the owner's attack stat.
                 if (isWeapon) {
                     damage += self.actor.stats.attack;
                 }
-                _dealDamage(other, damage);
+                _dealDamage(effect.self ? self : other, damage);
             }
             // TODO: handle non-DAMAGE item effect types (HEAL, ARMOR, POISON, ACID,
             //       STUN, MAX_HP, ATTACK, SPEED), honoring effect.effectTrigger and
