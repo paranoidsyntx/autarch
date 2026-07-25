@@ -32,7 +32,7 @@ export default function Home() {
       </section>
 
       {/* The Gameplay section */}
-      <section className="mx-auto w-full max-w-5xl px-6 py-24 sm:py-32">
+      <section className="mx-auto w-full max-w-5xl px-6 py-24">
         <SectionHeading title="Gameplay" />
 
         <div className="mt-8 grid items-start gap-10 sm:grid-cols-[auto_1fr] sm:gap-14">
@@ -66,7 +66,7 @@ export default function Home() {
       </section>
 
       {/* The Lore section */}
-      <section className="mx-auto w-full max-w-5xl px-6 py-24 sm:py-32">
+      <section className="mx-auto w-full max-w-5xl px-6 py-24">
         <SectionHeading title="The Lore" />
 
         <div className="mt-8 grid items-start gap-10 sm:grid-cols-[auto_1fr] sm:gap-14">
