@@ -11,6 +11,8 @@ contract Deploy is Script {
 
         Autarch autarch = new Autarch();
 
+        Autarch.Effect[] memory effects;
+
         /*
             Create items
             - Gold
@@ -20,6 +22,7 @@ contract Deploy is Script {
             - Conciliator's Claw
             - Fuligin Cloak
             - Prismatic Spray
+            - Baldanders' Serum
         */
 
         // Gold
@@ -29,8 +32,8 @@ contract Deploy is Script {
         }));
 
         // Osherl's Mercy
-        Autarch.Effect[] memory osherlsMercyEffects = new Autarch.Effect[](1);
-        osherlsMercyEffects[0] = Autarch.Effect({
+        effects = new Autarch.Effect[](1);
+        effects[0] = Autarch.Effect({
             effectTrigger: Autarch.EffectTrigger.WOUNDED,
             effectType: Autarch.EffectType.HEAL,
             value: 4,
@@ -38,18 +41,18 @@ contract Deploy is Script {
         });
         address osherlsMercy = autarch.createItem("Osherl's Mercy", "aOSHERLSMERCY", Autarch.Item({
             itemType: Autarch.ItemType.ITEM,
-            effects: osherlsMercyEffects
+            effects: effects
         }));
 
         // Mazirian's Boots
-        Autarch.Effect[] memory maziriansBootsEffects = new Autarch.Effect[](2);
-        maziriansBootsEffects[0] = Autarch.Effect({
-            effectTrigger: Autarch.EffectTrigger.TURN_START,
+        effects = new Autarch.Effect[](2);
+        effects[0] = Autarch.Effect({
+            effectTrigger: Autarch.EffectTrigger.PASSIVE,
             effectType: Autarch.EffectType.SPEED,
-            value: 1,
+            value: 6,
             self: true
         });
-        maziriansBootsEffects[1] = Autarch.Effect({
+        effects[1] = Autarch.Effect({
             effectTrigger: Autarch.EffectTrigger.TURN_START,
             effectType: Autarch.EffectType.DAMAGE,
             value: 1,
@@ -57,24 +60,24 @@ contract Deploy is Script {
         });
         autarch.createItem("Mazirian's Boots", "aMAZIRIANSBOOTS", Autarch.Item({
             itemType: Autarch.ItemType.ITEM,
-            effects: maziriansBootsEffects
+            effects: effects
         }));
 
         // IOUN Stone
-        Autarch.Effect[] memory iounStoneEffects = new Autarch.Effect[](3);
-        iounStoneEffects[0] = Autarch.Effect({
+        effects = new Autarch.Effect[](3);
+        effects[0] = Autarch.Effect({
             effectTrigger: Autarch.EffectTrigger.PASSIVE,
             effectType: Autarch.EffectType.ARMOR,
             value: 1,
             self: true
         });
-        iounStoneEffects[1] = Autarch.Effect({
+        effects[1] = Autarch.Effect({
             effectTrigger: Autarch.EffectTrigger.PASSIVE,
             effectType: Autarch.EffectType.ATTACK,
             value: 1,
             self: true
         });
-        iounStoneEffects[2] = Autarch.Effect({
+        effects[2] = Autarch.Effect({
             effectTrigger: Autarch.EffectTrigger.PASSIVE,
             effectType: Autarch.EffectType.SPEED,
             value: 1,
@@ -82,18 +85,18 @@ contract Deploy is Script {
         });
         autarch.createItem("IOUN Stone", "aIOUNSTONE", Autarch.Item({
             itemType: Autarch.ItemType.ITEM,
-            effects: iounStoneEffects
+            effects: effects
         }));
 
         // Conciliator's Claw
-        Autarch.Effect[] memory conciliatorsClawEffects = new Autarch.Effect[](2);
-        conciliatorsClawEffects[0] = Autarch.Effect({
+        effects = new Autarch.Effect[](2);
+        effects[0] = Autarch.Effect({
             effectTrigger: Autarch.EffectTrigger.BATTLE_START,
             effectType: Autarch.EffectType.HEAL,
             value: 5,
             self: true
         });
-        conciliatorsClawEffects[1] = Autarch.Effect({
+        effects[1] = Autarch.Effect({
             effectTrigger: Autarch.EffectTrigger.WOUNDED,
             effectType: Autarch.EffectType.HEAL,
             value: 5,
@@ -101,12 +104,12 @@ contract Deploy is Script {
         });
         autarch.createItem("Conciliator's Claw", "aCONCILIATORSCLAW", Autarch.Item({
             itemType: Autarch.ItemType.ITEM,
-            effects: conciliatorsClawEffects
+            effects: effects
         }));
 
         // Fuligin Cloak
-        Autarch.Effect[] memory fuliginCloakEffects = new Autarch.Effect[](1);
-        fuliginCloakEffects[0] = Autarch.Effect({
+        effects = new Autarch.Effect[](1);
+        effects[0] = Autarch.Effect({
             effectTrigger: Autarch.EffectTrigger.PASSIVE,
             effectType: Autarch.EffectType.SPEED,
             value: 2,
@@ -114,12 +117,12 @@ contract Deploy is Script {
         });
         autarch.createItem("Fuligin Cloak", "aFULIGINCLOAK", Autarch.Item({
             itemType: Autarch.ItemType.ITEM,
-            effects: fuliginCloakEffects
+            effects: effects
         }));
 
         // Prismatic Spray
-        Autarch.Effect[] memory prismaticSprayEffects = new Autarch.Effect[](1);
-        prismaticSprayEffects[0] = Autarch.Effect({
+        effects = new Autarch.Effect[](1);
+        effects[0] = Autarch.Effect({
             effectTrigger: Autarch.EffectTrigger.BATTLE_START,
             effectType: Autarch.EffectType.DAMAGE,
             value: 3,
@@ -127,7 +130,20 @@ contract Deploy is Script {
         });
         autarch.createItem("Prismatic Spray", "aPRISMATICSPRAY", Autarch.Item({
             itemType: Autarch.ItemType.ITEM,
-            effects: prismaticSprayEffects
+            effects: effects
+        }));
+
+        // Baldanders' Serum
+        effects = new Autarch.Effect[](1);
+        effects[0] = Autarch.Effect({
+            effectTrigger: Autarch.EffectTrigger.PASSIVE,
+            effectType: Autarch.EffectType.MAX_HP,
+            value: 7,
+            self: true
+        });
+        autarch.createItem("Baldanders' Serum", "aBALDANDERSSErum", Autarch.Item({
+            itemType: Autarch.ItemType.ITEM,
+            effects: effects
         }));
 
         /* 
@@ -135,11 +151,12 @@ contract Deploy is Script {
             - Withered Avern
             - Terminus Est
             - Azoth
+            - Avern
         */
 
         // Withered Avern
-        Autarch.Effect[] memory witheredAvernEffects = new Autarch.Effect[](1);
-        witheredAvernEffects[0] = Autarch.Effect({
+        effects = new Autarch.Effect[](1);
+        effects[0] = Autarch.Effect({
             effectTrigger: Autarch.EffectTrigger.TURN_START,
             effectType: Autarch.EffectType.DAMAGE,
             value: 1,
@@ -147,18 +164,18 @@ contract Deploy is Script {
         });
         address witheredAvern = autarch.createItem("Withered Avern", "aWITHEREDAVERN", Autarch.Item({
             itemType: Autarch.ItemType.WEAPON,
-            effects: witheredAvernEffects
+            effects: effects
         }));
 
         // Terminus Est
-        Autarch.Effect[] memory terminusEstEffects = new Autarch.Effect[](2);
-        terminusEstEffects[0] = Autarch.Effect({
+        effects = new Autarch.Effect[](2);
+        effects[0] = Autarch.Effect({
             effectTrigger: Autarch.EffectTrigger.TURN_START,
             effectType: Autarch.EffectType.DAMAGE,
             value: 4,
             self: false
         });
-        terminusEstEffects[1] = Autarch.Effect({
+        effects[1] = Autarch.Effect({
             effectTrigger: Autarch.EffectTrigger.PASSIVE,
             effectType: Autarch.EffectType.SPEED,
             value: 1,
@@ -166,12 +183,12 @@ contract Deploy is Script {
         });
         autarch.createItem("Terminus Est", "aTERMINUSEST", Autarch.Item({
             itemType: Autarch.ItemType.WEAPON,
-            effects: terminusEstEffects
+            effects: effects
         }));
 
         // Azoth
-        Autarch.Effect[] memory azothEffects = new Autarch.Effect[](1);
-        azothEffects[0] = Autarch.Effect({
+        effects = new Autarch.Effect[](1);
+        effects[0] = Autarch.Effect({
             effectTrigger: Autarch.EffectTrigger.TURN_START,
             effectType: Autarch.EffectType.DAMAGE,
             value: 5,
@@ -179,7 +196,26 @@ contract Deploy is Script {
         });
         autarch.createItem("Azoth", "aAZOTH", Autarch.Item({
             itemType: Autarch.ItemType.WEAPON,
-            effects: azothEffects
+            effects: effects
+        }));
+
+        // Avern
+        effects = new Autarch.Effect[](2);
+        effects[0] = Autarch.Effect({
+            effectTrigger: Autarch.EffectTrigger.TURN_START,
+            effectType: Autarch.EffectType.DAMAGE,
+            value: 2,
+            self: false
+        });
+        effects[1] = Autarch.Effect({
+            effectTrigger: Autarch.EffectTrigger.TURN_START,
+            effectType: Autarch.EffectType.POISON,
+            value: 1,
+            self: false
+        });
+        autarch.createItem("Avern", "aAVERN", Autarch.Item({
+            itemType: Autarch.ItemType.WEAPON,
+            effects: effects
         }));
 
         /*
