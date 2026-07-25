@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Press_Start_2P, Jacquard_24, Geist } from "next/font/google";
 import "./globals.css";
+import Providers from "@/components/providers";
 
 const pressStart = Press_Start_2P({
   variable: "--font-pixel",
@@ -34,7 +35,9 @@ export default function RootLayout({
       lang="en"
       className={`${pressStart.variable} ${jacquard.variable} ${geist.variable} h-full antialiased bg-background`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
