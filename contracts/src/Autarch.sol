@@ -119,7 +119,7 @@ contract Autarch {
     struct Effect {
         EffectTrigger effectTrigger;
         EffectType effectType;
-        int256 value;
+        uint256 value;
         bool self;
     }
 
@@ -159,6 +159,18 @@ contract Autarch {
         uint256 encounterCount;
         Actor character;
         address[] items;
+    }
+
+    // Mutable per-actor state for a single monster fight. Passed by reference
+    // between the combat helpers so effect stubs can mutate it in place.
+    struct Combatant {
+        Actor actor;       // hp + stats (stats may change mid-battle via effects)
+        uint256 armor;     // per-battle depletable shield (resets each fight)
+        Status status;     // poison, acid, stun
+        bool wounded;      // WOUNDED already triggered (fires once per actor)
+        bool exposed;      // EXPOSED already triggered (fires once per actor)
+        address[] items;   // equipped items (character); empty for the monster
+        Effect[] effects;  // innate effects (monster); empty for the character
     }
 
     Character721 public character721;
@@ -313,11 +325,15 @@ contract Autarch {
 
         encounterIds = _rollEncounters(dungeon, characterId);
 
+        // PASSIVE stat effects from equipped items are applied once, here, so they
+        // don't compound (and skew hp/maxHp) if re-applied every encounter.
+        Actor memory character = _applyPassiveStats(character721.getCharacter(characterId), items);
+
         _dungeonProgress[characterId] = DungeonProgress({
             dungeonId: dungeonId,
             encounterIds: encounterIds,
             encounterCount: 1,
-            character: character721.getCharacter(characterId),
+            character: character,
             items: items
         });
 
@@ -471,106 +487,184 @@ contract Autarch {
         address[] memory items,
         Monster memory monster
     ) internal view returns (Actor memory, MonsterResolution) {
-        // Armor is a per-battle depletable shield; it resets each fight and does
-        // not persist, so track it locally rather than mutating the stat.
-        uint256 charArmor = character.stats.armor;
-        uint256 monsterArmor = monster.actor.stats.armor;
+        // Armor is a per-battle depletable shield that resets each fight, so it
+        // lives on the Combatant rather than mutating the persistent stat.
+        Combatant memory char = Combatant({
+            actor: character,
+            armor: character.stats.armor,
+            status: Status({poison: 0, acid: 0, stun: 0}),
+            wounded: false,
+            exposed: false,
+            items: items,
+            effects: new Effect[](0)
+        });
+        Combatant memory mob = Combatant({
+            actor: monster.actor,
+            armor: monster.actor.stats.armor,
+            status: Status({poison: 0, acid: 0, stun: 0}),
+            wounded: false,
+            exposed: false,
+            items: new address[](0),
+            effects: monster.effects
+        });
 
-        // TODO: Apply PASSIVE effects (character items + monster effects)
-        // TODO: Apply BATTLE_START effects
+        // BATTLE_START effects resolve once, in speed order: higher speed first,
+        // ties favor the monster.
+        if (char.actor.stats.speed > mob.actor.stats.speed) {
+            _applyBattleStart(char, mob);
+            _applyBattleStart(mob, char);
+        } else {
+            _applyBattleStart(mob, char);
+            _applyBattleStart(char, mob);
+        }
 
         for (uint256 round = 0; round < 50; round++) {
-            // TODO: Apply TURN_START effects, tick POISON/ACID, skip turn on STUN
-
             // Turn order is re-evaluated each round so mid-battle SPEED changes
             // take effect: higher speed acts first, ties favor the monster.
-            bool characterFirst = character.stats.speed > monster.actor.stats.speed;
+            bool characterFirst = char.actor.stats.speed > mob.actor.stats.speed;
 
             if (characterFirst) {
-                (monster.actor.hp, monsterArmor) =
-                    _characterTurn(character, items, monster.actor.hp, monsterArmor);
-                if (monster.actor.hp == 0) return (character, MonsterResolution.MONSTER_DEATH);
+                _takeTurn(char, mob);
+                if (mob.actor.hp == 0) return (char.actor, MonsterResolution.MONSTER_DEATH);
 
-                (character.hp, charArmor) = _monsterTurn(monster, character.hp, charArmor);
-                if (character.hp == 0) return (character, MonsterResolution.CHARACTER_DEATH);
+                _takeTurn(mob, char);
+                if (char.actor.hp == 0) return (char.actor, MonsterResolution.CHARACTER_DEATH);
             } else {
-                (character.hp, charArmor) = _monsterTurn(monster, character.hp, charArmor);
-                if (character.hp == 0) return (character, MonsterResolution.CHARACTER_DEATH);
+                _takeTurn(mob, char);
+                if (char.actor.hp == 0) return (char.actor, MonsterResolution.CHARACTER_DEATH);
 
-                (monster.actor.hp, monsterArmor) =
-                    _characterTurn(character, items, monster.actor.hp, monsterArmor);
-                if (monster.actor.hp == 0) return (character, MonsterResolution.MONSTER_DEATH);
+                _takeTurn(char, mob);
+                if (mob.actor.hp == 0) return (char.actor, MonsterResolution.MONSTER_DEATH);
             }
         }
 
         // 50-round cap reached: the monster flees and the character survives with
         // whatever HP they have left.
-        return (character, MonsterResolution.FLED);
+        return (char.actor, MonsterResolution.FLED);
     }
 
-    function _characterTurn(
-        Actor memory character,
-        address[] memory items,
-        uint256 targetHp,
-        uint256 targetArmor
-    ) internal view returns (uint256 newHp, uint256 newArmor) {
-        newHp = targetHp;
-        newArmor = targetArmor;
+    function _takeTurn(Combatant memory self, Combatant memory other) internal view {
+        // TODO: if STUN causes this turn to be skipped, return before taking any action.
 
-        // Non-weapon items resolve first; the weapon (index 0) resolves last.
-        for (uint256 k = 1; k < items.length; k++) {
-            (newHp, newArmor) = _applyItemEffects(items[k], false, character, newHp, newArmor);
+        // WOUNDED and EXPOSED are evaluated at the start of the actor's own turn
+        // (from damage dealt since their last turn), before TURN_START. Each fires
+        // at most once per actor.
+        _checkWounded(self, other);
+        _checkExposed(self, other);
+
+        // TURN_START hook: tick POISON/ACID, resolve STUN, apply TURN_START effects.
+        _applyTurnStart(self, other);
+
+        // The attack is the actor applying its DAMAGE. For the character this means
+        // iterating equipped items with the weapon (index 0) resolving last; the
+        // monster instead uses its innate effects.
+        for (uint256 k = 1; k < self.items.length; k++) {
+            _applyItemAttack(self.items[k], false, self, other);
         }
-        if (items.length > 0) {
-            (newHp, newArmor) = _applyItemEffects(items[0], true, character, newHp, newArmor);
+        if (self.items.length > 0) {
+            _applyItemAttack(self.items[0], true, self, other);
+        }
+        for (uint256 i = 0; i < self.effects.length; i++) {
+            Effect memory effect = self.effects[i];
+            if (effect.effectType == EffectType.DAMAGE && !effect.self && effect.value > 0) {
+                _dealDamage(other, effect.value);
+            }
+            // TODO: handle non-DAMAGE / triggered / self-targeted monster effects.
         }
     }
 
-    function _applyItemEffects(
+    // --- Effect trigger stubs -------------------------------------------------
+    // Each stub resolves `self`'s effects for a given trigger. Character effects
+    // come from equipped items (weapon resolves last); the monster's come from its
+    // innate effects. `opponent` is passed so effects can target either actor via
+    // the effect's `self` flag.
+
+    function _applyBattleStart(Combatant memory self, Combatant memory other) internal pure {
+        // TODO: apply self's BATTLE_START-triggered effects (caller handles ordering).
+    }
+
+    function _applyTurnStart(Combatant memory self, Combatant memory other) internal pure {
+        // TODO: tick POISON/ACID from self.status, resolve STUN, then apply self's
+        //       TURN_START-triggered effects.
+    }
+
+    function _checkWounded(Combatant memory self, Combatant memory /* other */) internal pure {
+        // WOUNDED fires once, when the actor is at or below 50% of max HP.
+        if (self.wounded || self.actor.hp > self.actor.stats.maxHp / 2) {
+            return;
+        }
+        self.wounded = true;
+        // TODO: apply self's WOUNDED-triggered effects.
+    }
+
+    function _checkExposed(Combatant memory self, Combatant memory /* other */) internal pure {
+        // EXPOSED fires at most once per actor, the first time armor is depleted.
+        if (self.exposed || self.armor > 0) {
+            return;
+        }
+        self.exposed = true;
+        // TODO: apply self's EXPOSED-triggered effects.
+    }
+
+    function _applyPassiveStats(
+        Actor memory actor,
+        address[] memory items
+    ) internal view returns (Actor memory) {
+        // PASSIVE effects are assumed to be stat increases only.
+        for (uint256 k = 0; k < items.length; k++) {
+            Effect[] storage effects = _itemData[items[k]].effects;
+            for (uint256 i = 0; i < effects.length; i++) {
+                Effect storage effect = effects[i];
+                if (effect.effectTrigger != EffectTrigger.PASSIVE || effect.value == 0) {
+                    continue;
+                }
+
+                uint256 value = uint256(effect.value);
+                if (effect.effectType == EffectType.MAX_HP) {
+                    // Raise the pool and current HP together so the run starts full.
+                    actor.stats.maxHp += value;
+                    actor.hp += value;
+                } else if (effect.effectType == EffectType.ARMOR) {
+                    actor.stats.armor += value;
+                } else if (effect.effectType == EffectType.ATTACK) {
+                    actor.stats.attack += value;
+                } else if (effect.effectType == EffectType.SPEED) {
+                    actor.stats.speed += value;
+                }
+            }
+        }
+        return actor;
+    }
+
+    function _applyItemAttack(
         address item,
         bool isWeapon,
-        Actor memory owner,
-        uint256 targetHp,
-        uint256 targetArmor
-    ) internal view returns (uint256 newHp, uint256 newArmor) {
-        newHp = targetHp;
-        newArmor = targetArmor;
-
+        Combatant memory self,
+        Combatant memory other
+    ) internal view {
         Effect[] storage effects = _itemData[item].effects;
         for (uint256 i = 0; i < effects.length; i++) {
             Effect storage effect = effects[i];
 
             if (effect.effectType == EffectType.DAMAGE && !effect.self && effect.value > 0) {
-                uint256 damage = uint256(effect.value);
+                uint256 damage = effect.value;
                 // Only the weapon's DAMAGE effect adds the owner's attack stat.
                 if (isWeapon) {
-                    damage += owner.stats.attack;
+                    damage += self.actor.stats.attack;
                 }
-                (newHp, newArmor) = _applyDamage(newHp, newArmor, damage);
+                _dealDamage(other, damage);
             }
-            // TODO: handle HEAL, ARMOR, POISON, ACID, STUN, MAX_HP, ATTACK, SPEED
-            // TODO: honor EffectTrigger (every effect currently resolves on the owner's turn)
-            // TODO: honor `self` (self-targeted effects)
+            // TODO: handle non-DAMAGE item effect types (HEAL, ARMOR, POISON, ACID,
+            //       STUN, MAX_HP, ATTACK, SPEED), honoring effect.effectTrigger and
+            //       effect.self.
         }
     }
 
-    function _monsterTurn(
-        Monster memory monster,
-        uint256 targetHp,
-        uint256 targetArmor
-    ) internal pure returns (uint256 newHp, uint256 newArmor) {
-        newHp = targetHp;
-        newArmor = targetArmor;
-
-        for (uint256 i = 0; i < monster.effects.length; i++) {
-            Effect memory effect = monster.effects[i];
-
-            if (effect.effectType == EffectType.DAMAGE && !effect.self && effect.value > 0) {
-                // TODO: decide whether the monster's attack stat should add here
-                (newHp, newArmor) = _applyDamage(newHp, newArmor, uint256(effect.value));
-            }
-            // TODO: handle other effect types, triggers, and self-targeted effects
-        }
+    function _dealDamage(Combatant memory defender, uint256 damage) internal pure {
+        // Damage only mutates HP/armor here. WOUNDED/EXPOSED are evaluated later,
+        // at the start of the defender's own turn (see _takeTurn).
+        (defender.actor.hp, defender.armor) =
+            _applyDamage(defender.actor.hp, defender.armor, damage);
     }
 
     function _applyDamage(
@@ -582,8 +676,8 @@ contract Autarch {
             return (hp, armor - damage);
         }
 
-        // Armor fully absorbed; overflow spills onto HP.
-        // TODO: fire EXPOSED trigger now that armor has reached 0
+        // Armor fully absorbed; overflow spills onto HP. EXPOSED is detected at the
+        // start of the actor's turn once armor has reached 0 (see _checkExposed).
         damage -= armor;
         newArmor = 0;
         newHp = damage >= hp ? 0 : hp - damage;
