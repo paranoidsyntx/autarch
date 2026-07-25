@@ -25,7 +25,7 @@ export default function Home() {
         {/* Play button */}
         <a
           href="#play"
-          className="font-pixel mt-10 inline-flex select-none items-center justify-center border-2 border-gold bg-gold px-12 py-5 text-sm uppercase tracking-[0.3em] text-background transition-colors hover:bg-transparent hover:text-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:text-base"
+          className="font-pixel mt-10 inline-flex select-none items-center justify-center border-2 border-gold bg-gold px-12 py-3 text-sm uppercase tracking-[0.3em] text-background transition-colors hover:bg-transparent hover:text-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:text-base"
         >
           Play
         </a>
