@@ -4,7 +4,7 @@ query Character($owner: ID!) {
     characterId
     name
     classIndex
-    balances {
+    balances(first: 100) {
       item {
 				id
         itemId
