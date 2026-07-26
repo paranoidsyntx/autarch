@@ -1,0 +1,9 @@
+# .graphclientrc.yml
+sources:
+  - name: autarch
+    handler:
+      graphql:
+        endpoint: https://api.studio.thegraph.com/query/1757011/autarch-arbitrum-sepolia/version/latest
+
+documents:
+  - ./queries/character.graphql

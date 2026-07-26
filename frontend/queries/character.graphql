@@ -1,0 +1,15 @@
+query Character($owner: ID!) {
+  character(id: $owner) {
+    id
+    characterId
+    name
+    classIndex
+    balances {
+      item {
+				id
+        itemId
+      }
+      amount
+    }
+  }
+}

@@ -1,73 +1,21 @@
-type CharacterMinted @entity(immutable: true) {
-  id: Bytes!
+type Character @entity(immutable: false) {
+  id: Bytes! # address
   characterId: BigInt! # uint256
   name: String! # string
   classIndex: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  balances: [Balance!]! @derivedFrom(field: "character")
 }
 
-type DungeonCreated @entity(immutable: true) {
-  id: Bytes!
-  dungeonId: Bytes! # bytes32
-  totalEncounters: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type DungeonItem @entity(immutable: true) {
-  id: Bytes!
-  characterId: BigInt! # uint256
-  item: Bytes! # address
+type Item @entity(immutable: true) {
+  id: Bytes! # address
   itemId: Bytes! # bytes32
-  gainedExp: BigInt! # uint256
-  encounterIndexes: [BigInt!]! # uint256[]
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type DungeonMonster @entity(immutable: true) {
-  id: Bytes!
-  characterId: BigInt! # uint256
-  resolution: Int! # uint8
-  gainedExp: BigInt! # uint256
-  encounterIndexes: [BigInt!]! # uint256[]
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type DungeonRest @entity(immutable: true) {
-  id: Bytes!
-  characterId: BigInt! # uint256
-  prevHp: BigInt! # uint256
-  newHp: BigInt! # uint256
-  encounterIndexes: [BigInt!]! # uint256[]
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type DungeonStarted @entity(immutable: true) {
-  id: Bytes!
-  characterId: BigInt! # uint256
-  dungeonId: Bytes! # bytes32
-  encounterIndexes: [BigInt!]! # uint256[]
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type ItemCreated @entity(immutable: true) {
-  id: Bytes!
-  itemId: Bytes! # bytes32
-  item: Bytes! # address
   name: String! # string
   symbol: String! # string
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
+}
+
+type Balance @entity(immutable: false) {
+  id: Bytes!
+  item: Item!
+  character: Character!
+  amount: BigInt!
 }
