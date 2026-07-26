@@ -17,10 +17,7 @@ contract Autarch {
         string symbol
     );
 
-    event DungeonCreated(
-        bytes32 indexed dungeonId,
-        uint256 totalEncounters
-    );
+    event DungeonCreated(bytes32 indexed dungeonId, uint256 totalEncounters);
 
     event CharacterMinted(
         uint256 indexed characterId,
@@ -43,7 +40,7 @@ contract Autarch {
 
     event DungeonMonster(
         uint256 indexed characterId,
-        // TODO: Add more data
+        MonsterResolution indexed resolution,
         uint256 gainedExp,
         uint256[] encounterIndexes
     );
@@ -187,6 +184,10 @@ contract Autarch {
         item20Implementation = new Item20();
     }
 
+    function getItemAddress(bytes32 itemId) external view returns (address) {
+        return _itemAddresses[itemId];
+    }
+
     function setStartingItems(StartingItem[] memory newStartingItems) external {
         delete _startingItems;
         for (uint256 i = 0; i < newStartingItems.length; i++) {
@@ -219,18 +220,21 @@ contract Autarch {
     function createMonster(
         bytes32 monsterId,
         uint256 exp,
-        Actor memory actor,
+        Stats memory stats,
         Effect[] memory effects
     ) external {
         if (_monsterExists(monsterId)) {
             revert("Monster already exists");
         }
-        if(effects.length == 0) {
+        if (effects.length == 0) {
             revert("Effects cannot be empty");
         }
 
         _monsters[monsterId].exp = exp;
-        _monsters[monsterId].actor = actor;
+        _monsters[monsterId].actor = Actor({
+            hp: stats.maxHp,
+            stats: stats
+        });
         for (uint256 i = 0; i < effects.length; i++) {
             _monsters[monsterId].effects.push(effects[i]);
         }
@@ -251,6 +255,9 @@ contract Autarch {
     ) external {
         if (_dungeonExists(dungeonId)) {
             revert("Dungeon already exists");
+        }
+        if (totalEncounters == 0) {
+            revert("Total encounters must be greater than zero");
         }
         if (restChance + monsterChance + itemChance == 0) {
             revert("Total chance must be greater than zero");
@@ -279,9 +286,15 @@ contract Autarch {
         _dungeons[dungeonId].monsterChance = monsterChance;
         _dungeons[dungeonId].itemChance = itemChance;
         for (uint256 i = 0; i < monsterEncounters.length; i++) {
+            if (!_monsterExists(monsterEncounters[i].monsterId)) {
+                revert("Monster does not exist");
+            }
             _dungeons[dungeonId].monsterEncounters.push(monsterEncounters[i]);
         }
         for (uint256 i = 0; i < itemEncounters.length; i++) {
+            if (!_itemExists(itemEncounters[i].itemId)) {
+                revert("Item does not exist");
+            }
             _dungeons[dungeonId].itemEncounters.push(itemEncounters[i]);
         }
 
@@ -300,7 +313,7 @@ contract Autarch {
             revert SenderAlreadyHasCharacter(msg.sender);
         }
 
-        characterId = character721.mint(name, classIndex);
+        characterId = character721.mint(msg.sender, name, classIndex);
 
         for (uint256 i = 0; i < _startingItems.length; i++) {
             Item20(_itemAddresses[_startingItems[i].itemId]).mint(
@@ -330,11 +343,19 @@ contract Autarch {
             revert("Must at least equip a weapon");
         }
         for (uint256 i = 0; i < itemIds.length; i++) {
-            if((i == 0 && _itemData[itemIds[i]].itemType != ItemType.WEAPON) || (i > 0 && _itemData[itemIds[i]].itemType != ItemType.ITEM)) {
-                revert("First item must be a weapon, other items must be items");
+            if (
+                (i == 0 && _itemData[itemIds[i]].itemType != ItemType.WEAPON) ||
+                (i > 0 && _itemData[itemIds[i]].itemType != ItemType.ITEM)
+            ) {
+                revert(
+                    "First item must be a weapon, other items must be items"
+                );
             }
             // Allows single item to be equipped multiple times, good enough for hackathon
-            if (Item20(_itemAddresses[itemIds[i]]).balanceOf(msg.sender) < 1 ether) {
+            if (
+                Item20(_itemAddresses[itemIds[i]]).balanceOf(msg.sender) <
+                1 ether
+            ) {
                 revert("Item not owned by sender");
             }
         }
@@ -403,19 +424,54 @@ contract Autarch {
 
             _dungeonProgress[characterId].character.hp = newHp;
 
-            emit DungeonRest(
-                characterId,
-                prevHp,
-                newHp,
-                encounterIndexes
-            );
+            emit DungeonRest(characterId, prevHp, newHp, encounterIndexes);
         } else if (encounterIndex < dungeon.monsterEncounters.length + 1) {
             // Monster
-            //uint256 index = encounterId - 1;
-            // TODO: Deal with player death or monster defeat
+            uint256 index = encounterIndex - 1;
+            bytes32 monsterId = dungeon.monsterEncounters[index].monsterId;
+
+            (
+                Actor memory updatedCharacter,
+                MonsterResolution resolution
+            ) = _resolveMonsterEncounter(
+                    progress.character,
+                    progress.itemIds,
+                    _monsters[monsterId]
+                );
+
+            if (resolution == MonsterResolution.CHARACTER_DEATH) {
+                delete _dungeonProgress[characterId];
+                encounterIndexes = new uint256[](0);
+                emit DungeonMonster(
+                    characterId,
+                    MonsterResolution.CHARACTER_DEATH,
+                    0,
+                    encounterIndexes
+                );
+                return encounterIndexes;
+            }
+
+            _dungeonProgress[characterId].character = updatedCharacter;
+
+            uint256 gainedExp = resolution == MonsterResolution.MONSTER_DEATH
+                ? _monsters[monsterId].exp
+                : 0;
+
+            if (gainedExp > 0) {
+                character721.gainExp(characterId, gainedExp);
+            }
+
+            emit DungeonMonster(
+                characterId,
+                resolution,
+                gainedExp,
+                encounterIndexes
+            );
         } else {
             // Item
-            uint256 index = encounterIndex - dungeon.monsterEncounters.length - 1;
+            uint256 index = encounterIndex -
+                dungeon.monsterEncounters.length -
+                1;
 
             Item20(_itemAddresses[dungeon.itemEncounters[index].itemId]).mint(
                 character721.ownerOf(characterId),
@@ -464,7 +520,7 @@ contract Autarch {
     function _rollEncounters(
         Dungeon memory dungeon,
         uint256 characterId
-    ) internal view returns (uint256[] memory encounterIds) {
+    ) internal view returns (uint256[] memory encounterIndexes) {
         // Terrible pseudo-random number generation in this function
         // Easily abused by reverting on unfavorable results, good enough for hackathon
         uint256 sudoRandom = uint256(
@@ -472,7 +528,7 @@ contract Autarch {
                 abi.encodePacked(block.number, block.prevrandao, characterId)
             )
         );
-        encounterIds = new uint256[](3);
+        encounterIndexes = new uint256[](3);
         for (uint256 i = 0; i < 3; i++) {
             uint256 typeSum = dungeon.restChance +
                 dungeon.monsterChance +
@@ -481,7 +537,7 @@ contract Autarch {
 
             if (typeRoll < dungeon.restChance) {
                 // Rest
-                encounterIds[i] = 0;
+                encounterIndexes[i] = 0;
             } else if (
                 typeRoll < dungeon.restChance + dungeon.monsterChance &&
                 dungeon.monsterEncounters.length > 0
@@ -498,7 +554,7 @@ contract Autarch {
                     cumulative += dungeon.monsterEncounters[j].chance;
                     if (roll < cumulative) {
                         // +1 to offset the rest encounter
-                        encounterIds[i] = j + 1;
+                        encounterIndexes[i] = j + 1;
                         break;
                     }
                 }
@@ -515,7 +571,7 @@ contract Autarch {
                     cumulative += dungeon.itemEncounters[j].chance;
                     if (roll < cumulative) {
                         // Offset the rest and monster encounters
-                        encounterIds[i] =
+                        encounterIndexes[i] =
                             j +
                             dungeon.monsterEncounters.length +
                             1;

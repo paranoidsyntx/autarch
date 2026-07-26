@@ -124,6 +124,7 @@ contract Character721 is ERC721 {
     }
 
     function mint(
+        address to,
         string memory _name,
         uint256 _classId
     ) external returns (uint256 tokenId) {
@@ -140,7 +141,7 @@ contract Character721 is ERC721 {
             classId: _classId
         });
 
-        _mint(msg.sender, tokenId);
+        _mint(to, tokenId);
     }
 
     function gainExp(
