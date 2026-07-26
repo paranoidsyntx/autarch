@@ -38,8 +38,20 @@ export default function Play() {
     return <LoadingScreen />;
   }
 
+  const refreshCharacter = async () => {
+    if (!embeddedWallet) return;
+    for (let i = 0; i < 10; i++) {
+      await new Promise((r) => setTimeout(r, 2000));
+      const c = await getCharacter(embeddedWallet.address.toLowerCase());
+      if (c) {
+        setCharacter(c);
+        return;
+      }
+    }
+  };
+
   if (character) {
-    return <GameMenu character={character} />;
+    return <GameMenu character={character} onRefresh={refreshCharacter} />;
   }
 
   return (
