@@ -1,3 +1,0 @@
-{
-  "7f22983025b73602e1928ed16820dcb697e956b904083eb6d0054840930db08a": "query Character($owner: ID!) {\n  character(id: $owner) {\n    id\n    characterId\n    name\n    classIndex\n    balances {\n      item {\n        id\n        itemId\n      }\n      amount\n    }\n  }\n}"
-}
