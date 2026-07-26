@@ -61,16 +61,21 @@ export default function Home() {
           {/* Body copy */}
           <div>
             <p className="text-sm leading-relaxed text-muted-foreground first-letter:mr-3 first-letter:float-left first-letter:font-display first-letter:text-6xl first-letter:leading-none first-letter:text-[#FF0000] sm:text-base">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
+              Choose from four classes — Apprentice, Knight, Magician, or
+              Rogue — each with distinct strengths forged for a different
+              style of survival. Equip a weapon and up to four artifacts,
+              then descend into one of three dungeons of escalating danger.
+              Every encounter is resolved fully on-chain: your fate is
+              sealed in the transaction.
             </p>
             <p className="mt-6 text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Duis aute irure dolor in reprehenderit in voluptate velit esse
-              cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-              cupidatat non proident, sunt in culpa qui officia deserunt mollit
-              anim id est laborum.
+              Each dungeon presents a series of encounters drawn at random —
+              rest at a campfire to recover your strength, battle monsters
+              whose abilities can poison, stun, and shatter your armor, or
+              discover powerful relics hidden in the depths. Items you find
+              are yours to keep forever, carried as tokens in your wallet
+              from one expedition to the next. Die, and you leave with
+              nothing. Survive, and grow stronger.
             </p>
           </div>
         </div>
@@ -106,16 +111,23 @@ export default function Home() {
           {/* Body copy */}
           <div>
             <p className="text-sm leading-relaxed text-muted-foreground first-letter:mr-3 first-letter:float-left first-letter:font-display first-letter:text-6xl first-letter:leading-none first-letter:text-[#00eeff] sm:text-base">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
+              The world turns beneath a dying sun. The great cities of the
+              Commonwealth have crumbled into vine and silence, and the
+              throne of the Autarch sits empty. In the wilds beyond the
+              fallen walls, ancient dungeons stir with creatures older
+              than memory — the shape-stealing Alzabo, the shadow-haunting
+              Deodand, and worse things that have no name.
             </p>
             <p className="mt-6 text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Duis aute irure dolor in reprehenderit in voluptate velit esse
-              cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-              cupidatat non proident, sunt in culpa qui officia deserunt mollit
-              anim id est laborum.
+              Scattered through the ruins lie relics of a forgotten age:
+              Terminus Est, the executioner&apos;s blade balanced with mercury;
+              the Fuligin Cloak, darker than black; the IOUN Stone, humming
+              with the last light of a dead star. Those brave or desperate
+              enough to venture into the Vennelen Glades, the Mines of
+              Saltus, and the arcane depths of Iucounu&apos;s Manse may claim
+              these treasures — or join the bones that litter their halls.
+              The world awaits its next Autarch. Will you rise, or will
+              you be forgotten?
             </p>
           </div>
         </div>

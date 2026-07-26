@@ -1,13 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SectionHeading } from "@/components/section-heading";
+import Image from "next/image";
 
 const SLIDES = [
-  { id: 1, label: "The Descent" },
-  { id: 2, label: "The Catacombs" },
-  { id: 3, label: "The Throne" },
-  { id: 4, label: "The Sovereign" },
+  { id: 1, label: "Character Creation", src: "/screenshots/Screenshot 2026-07-26 080943.png" },
+  { id: 2, label: "Dungeon Selection", src: "/screenshots/Screenshot 2026-07-26 081009.png" },
+  { id: 3, label: "Encounter", src: "/screenshots/Screenshot 2026-07-26 081044.png" },
 ];
 
 const AUTOPLAY_MS = 4000;
@@ -85,14 +84,14 @@ export function ScreenshotsCarousel() {
             {SLIDES.map((slide) => (
               <div
                 key={slide.id}
-                className="scanlines flex aspect-video w-full shrink-0 flex-col items-center justify-center gap-3 bg-background"
+                className="relative flex aspect-video w-full shrink-0 bg-background"
               >
-                <span className="font-pixel text-sm uppercase tracking-[0.2em] text-foreground sm:text-lg">
-                  {slide.label}
-                </span>
-                <span className="font-pixel text-[9px] uppercase tracking-[0.3em] text-muted-foreground sm:text-[10px]">
-                  Screenshot coming soon
-                </span>
+                <Image
+                  src={slide.src}
+                  alt={slide.label}
+                  fill
+                  className="object-contain"
+                />
               </div>
             ))}
           </div>
