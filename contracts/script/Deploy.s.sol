@@ -7,7 +7,9 @@ import {Autarch} from "../src/Autarch.sol";
 
 contract Deploy is Script {
     function run() public {
-        vm.startBroadcast();
+        uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
+
+        vm.startBroadcast(deployerPrivateKey);
 
         Autarch autarch = new Autarch();
 

@@ -14,7 +14,7 @@ export default function Home() {
           width={320}
           height={80}
           priority
-          className="pixelated -mt-[8.3vw] w-full h-auto object-cover"
+          className="pixelated -mt-32 w-full h-auto object-cover"
         />
 
         {/* Title */}
@@ -25,7 +25,7 @@ export default function Home() {
         {/* Play button */}
         <a
           href="/play"
-          className="font-pixel mt-10 inline-flex select-none items-center justify-center border-2 border-accent bg-transparent px-12 py-3 text-sm uppercase tracking-[0.3em] text-accent transition-colors hover:bg-accent hover:text-background focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:text-base"
+          className="font-pixel inline-flex select-none items-center justify-center border-2 border-white bg-transparent px-12 py-3 text-sm uppercase tracking-[0.3em] text-white transition-colors hover:bg-white hover:text-background focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:text-base"
         >
           Play
         </a>
@@ -33,7 +33,18 @@ export default function Home() {
 
       {/* The Gameplay section */}
       <section className="mx-auto w-full max-w-5xl px-6 py-24">
-        <SectionHeading title="Gameplay" />
+        <div className="flex flex-col items-center text-center">
+          <h2
+            className={`font-display mt-5 text-6xl sm:text-8xl leading-none text-balance text-[#FF0000]`}
+          >
+            Gameplay
+          </h2>
+          <div className="mt-6 flex items-center gap-3" aria-hidden="true">
+            <span className="h-px w-12 bg-foreground/30 sm:w-24" />
+            <span className={`h-2.5 w-2.5 rotate-45 bg-[#FF0000]`} />
+            <span className="h-px w-12 bg-foreground/30 sm:w-24" />
+          </div>
+        </div>
 
         <div className="mt-8 grid items-start gap-10 sm:grid-cols-[auto_1fr] sm:gap-14">
           {/* Swords sprite */}
@@ -49,7 +60,7 @@ export default function Home() {
 
           {/* Body copy */}
           <div>
-            <p className="text-sm leading-relaxed text-muted-foreground first-letter:mr-3 first-letter:float-left first-letter:font-display first-letter:text-6xl first-letter:leading-none first-letter:text-accent sm:text-base">
+            <p className="text-sm leading-relaxed text-muted-foreground first-letter:mr-3 first-letter:float-left first-letter:font-display first-letter:text-6xl first-letter:leading-none first-letter:text-[#FF0000] sm:text-base">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
               eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
               enim ad minim veniam, quis nostrud exercitation ullamco laboris
@@ -67,7 +78,18 @@ export default function Home() {
 
       {/* The Lore section */}
       <section className="mx-auto w-full max-w-5xl px-6 py-24">
-        <SectionHeading title="The Lore" />
+        <div className="flex flex-col items-center text-center">
+          <h2
+            className={`font-display mt-5 text-6xl sm:text-8xl leading-none text-balance text-[#00eeff]`}
+          >
+            The Lore
+          </h2>
+          <div className="mt-6 flex items-center gap-3" aria-hidden="true">
+            <span className="h-px w-12 bg-foreground/30 sm:w-24" />
+            <span className={`h-2.5 w-2.5 rotate-45 bg-[#00eeff]`} />
+            <span className="h-px w-12 bg-foreground/30 sm:w-24" />
+          </div>
+        </div>
 
         <div className="mt-8 grid items-start gap-10 sm:grid-cols-[auto_1fr] sm:gap-14">
           {/* Book sprite */}
@@ -83,7 +105,7 @@ export default function Home() {
 
           {/* Body copy */}
           <div>
-            <p className="text-sm leading-relaxed text-muted-foreground first-letter:mr-3 first-letter:float-left first-letter:font-display first-letter:text-6xl first-letter:leading-none first-letter:text-accent sm:text-base">
+            <p className="text-sm leading-relaxed text-muted-foreground first-letter:mr-3 first-letter:float-left first-letter:font-display first-letter:text-6xl first-letter:leading-none first-letter:text-[#00eeff] sm:text-base">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
               eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
               enim ad minim veniam, quis nostrud exercitation ullamco laboris

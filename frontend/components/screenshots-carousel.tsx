@@ -56,7 +56,18 @@ export function ScreenshotsCarousel() {
 
   return (
     <section className="mx-auto w-full max-w-5xl px-6 py-24 sm:py-32">
-      <SectionHeading title="Screenshots" />
+      <div className="flex flex-col items-center text-center">
+        <h2
+          className={`font-display mt-5 text-6xl sm:text-8xl leading-none text-balance text-gold`}
+        >
+          Screenshots
+        </h2>
+        <div className="mt-6 flex items-center gap-3" aria-hidden="true">
+          <span className="h-px w-12 bg-foreground/30 sm:w-24" />
+          <span className={`h-2.5 w-2.5 rotate-45 bg-gold`} />
+          <span className="h-px w-12 bg-foreground/30 sm:w-24" />
+        </div>
+      </div>
 
       {/* Framed viewer */}
       <div className="relative mt-8 border-2 border-foreground">
@@ -97,10 +108,10 @@ export function ScreenshotsCarousel() {
             onClick={() => goTo(i)}
             aria-label={`Go to ${slide.label}`}
             aria-current={i === index}
-            className={`h-3.5 w-3.5 rotate-45 border-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+            className={`h-3.5 w-3.5 rotate-45 border-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
               i === index
-                ? "border-accent bg-accent"
-                : "border-foreground bg-background hover:border-accent"
+                ? "border-gold bg-gold"
+                : "border-foreground bg-background hover:border-gold"
             }`}
           />
         ))}
