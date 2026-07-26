@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Character } from "@/lib/actions/character";
 import { CLASSES } from "@/lib/data/classes";
 import { ITEMS, Item, EFFECT_COLORS, ItemType } from "@/lib/data/items";
+import { DUNGEONS } from "@/lib/data/dungeons";
 import Image from "next/image";
 
 function formatEffect(effect: Item["effects"][number]): { text: string; color: string } {
@@ -107,7 +108,7 @@ export function GameMenu({ character }: GameMenuProps) {
   };
 
   return (
-    <main className="flex flex-1 bg-background text-foreground h-full">
+    <main className="flex flex-1 bg-background text-foreground h-full overflow-hidden">
       {/* Left Sidebar */}
       <aside className="flex w-64 flex-col border-r-2 border-foreground/10 p-6 gap-6">
         {/* Character name */}
@@ -249,24 +250,43 @@ export function GameMenu({ character }: GameMenuProps) {
       </aside>
 
       {/* Right content: dungeon area + inventory bottom */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col min-h-0">
         {/* Main content area - Dungeon selection */}
-        <div className="flex flex-1 flex-col items-center justify-center p-8">
-          <h2 className="font-display text-4xl sm:text-6xl text-[#FF0000]">
+        <div className="flex flex-1 flex-col items-center justify-center overflow-auto min-h-0">
+          <h2 className="font-display text-5xl text-[#FF0000] mb-3">
             Dungeons
           </h2>
-          <div className="mt-4 flex items-center gap-3" aria-hidden="true">
-            <span className="h-px w-12 bg-foreground/30 sm:w-24" />
-            <span className="h-2.5 w-2.5 rotate-45 bg-[#FF0000]" />
-            <span className="h-px w-12 bg-foreground/30 sm:w-24" />
+
+          <div className="mt-2 flex flex-wrap justify-center gap-8">
+            {Object.values(DUNGEONS).map((dungeon) => (
+              <button
+                key={dungeon.id}
+                className="group relative flex flex-col items-center cursor-pointer w-52"
+              >
+                <div className="relative border-2 border-foreground/30 overflow-hidden transition group-hover:border-gold group-hover:shadow-[0_0_20px_rgba(255,215,0,0.15)]">
+                  <div className="h-52 w-52 pixelated">
+                    <Image
+                      src={dungeon.image}
+                      alt={dungeon.name}
+                      width={208}
+                      height={208}
+                      className="h-full w-full pixelated object-cover transition group-hover:scale-105"
+                    />
+                  </div>
+                </div>
+                <p className="font-display text-3xl text-white leading-tight">
+                  {dungeon.name}
+                </p>
+                <span className="font-pixel text-[11px] text-[#f700ff]">
+                  difficulty {"+".repeat(dungeon.difficulty)}
+                </span>
+              </button>
+            ))}
           </div>
-          <p className="mt-6 font-pixel text-sm text-foreground/40">
-            Coming soon...
-          </p>
         </div>
 
         {/* Bottom bar - Inventory */}
-        <div className="border-t-2 border-foreground/10 p-4">
+        <div className="shrink-0 border-t-2 border-foreground/10 p-4">
           <span className="font-pixel text-xs uppercase tracking-[0.2em] text-foreground/70 mb-2 block">
             Inventory
           </span>
