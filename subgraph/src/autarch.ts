@@ -9,7 +9,7 @@ import {
 import { Item20 } from "../generated/templates";
 
 export function handleCharacterMinted(event: CharacterMintedEvent): void {
-  let character = new Character(event.transaction.from);
+  let character = new Character(event.params.owner);
   character.characterId = event.params.characterId;
   character.name = event.params.name;
   character.classIndex = event.params.classIndex;

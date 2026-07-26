@@ -36,6 +36,12 @@
         "internalType": "uint256",
         "name": "classIndex",
         "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
       }
     ],
     "name": "CharacterMinted",

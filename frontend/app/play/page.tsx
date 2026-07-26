@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { getCharacter, Character } from "@/lib/actions/character";
+import { LoadingScreen } from "./loading-screen";
+import { CharacterCreation } from "./character-creation";
+import { GameMenu } from "./game-menu";
 
 export default function Play() {
   const { ready, authenticated, login } = usePrivy();
@@ -10,6 +14,9 @@ export default function Play() {
 
   const embeddedWallet = wallets.find((w) => w.walletClientType === "privy");
 
+  const [character, setCharacter] = useState<Character | null>(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     if (ready && !authenticated && !loginTriggered.current) {
       loginTriggered.current = true;
@@ -17,19 +24,28 @@ export default function Play() {
     }
   }, [ready, authenticated, login]);
 
-  if (!ready || !authenticated || !embeddedWallet) {
-    return (
-      <main className="flex flex-1 flex-col items-center justify-center bg-background text-foreground">
-        <p className="font-display text-5xl">Loading...</p>
-      </main>
-    );
+  useEffect(() => {
+    if (!embeddedWallet) return;
+
+    getCharacter(embeddedWallet.address.toLowerCase())
+      .then((c) => {
+        if (c) setCharacter(c);
+      })
+      .finally(() => setLoading(false));
+  }, [embeddedWallet]);
+
+  if (!ready || !authenticated || loading || !embeddedWallet) {
+    return <LoadingScreen />;
+  }
+
+  if (character) {
+    return <GameMenu character={character} />;
   }
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center bg-background text-foreground">
-      <p className="text-2xl">
-        {embeddedWallet ? embeddedWallet.address : "Loading wallet..."}
-      </p>
-    </main>
+    <CharacterCreation
+      walletAddress={embeddedWallet.address.toLowerCase()}
+      onCharacterCreated={setCharacter}
+    />
   );
 }

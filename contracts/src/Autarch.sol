@@ -22,7 +22,8 @@ contract Autarch {
     event CharacterMinted(
         uint256 indexed characterId,
         string name,
-        uint256 classIndex
+        uint256 classIndex,
+        address indexed owner
     );
 
     event DungeonStarted(
@@ -322,7 +323,7 @@ contract Autarch {
             );
         }
 
-        emit CharacterMinted(characterId, name, classIndex);
+        emit CharacterMinted(characterId, name, classIndex, msg.sender);
     }
 
     function startDungeon(

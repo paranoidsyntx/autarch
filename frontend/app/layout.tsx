@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Press_Start_2P, Jacquard_24, Geist } from "next/font/google";
+import { IBM_Plex_Mono, Jacquard_24, Geist } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/providers";
 
-const pressStart = Press_Start_2P({
+const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-pixel",
-  weight: "400",
+  weight: ["400", "500"],
   subsets: ["latin"],
 });
 
@@ -33,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${pressStart.variable} ${jacquard.variable} ${geist.variable} h-full antialiased bg-background`}
+      className={`${ibmPlexMono.variable} ${jacquard.variable} ${geist.variable} h-full antialiased bg-background`}
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>

@@ -8,7 +8,7 @@ dataSources:
     name: Autarch
     network: arbitrum-sepolia
     source:
-      address: "0x92750075a8D78862209Bc8da6F621A6631659739"
+      address: "0x7655453e888B774fC31b7Cf96be8e353A30D00D1"
       abi: Autarch
       startBlock: 291386312
     mapping:
@@ -23,7 +23,7 @@ dataSources:
         - name: Autarch
           file: ./abis/Autarch.json
       eventHandlers:
-        - event: CharacterMinted(indexed uint256,string,uint256)
+        - event: CharacterMinted(indexed uint256,string,uint256,indexed address)
           handler: handleCharacterMinted
         - event: ItemCreated(indexed bytes32,indexed address,string,string)
           handler: handleItemCreated

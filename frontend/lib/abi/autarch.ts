@@ -1,0 +1,423 @@
+export const AUTARCH_ABI = [
+    { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
+    { "inputs": [], "name": "FailedDeployment", "type": "error" },
+    {
+        "inputs": [
+            { "internalType": "uint256", "name": "balance", "type": "uint256" },
+            { "internalType": "uint256", "name": "needed", "type": "uint256" }
+        ],
+        "name": "InsufficientBalance",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            { "internalType": "address", "name": "sender", "type": "address" }
+        ],
+        "name": "SenderAlreadyHasCharacter",
+        "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "characterId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "classIndex",
+                "type": "uint256"
+            }
+        ],
+        "name": "CharacterMinted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "bytes32",
+                "name": "dungeonId",
+                "type": "bytes32"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "totalEncounters",
+                "type": "uint256"
+            }
+        ],
+        "name": "DungeonCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "characterId",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "item",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "bytes32",
+                "name": "itemId",
+                "type": "bytes32"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "gainedExp",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256[]",
+                "name": "encounterIndexes",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "DungeonItem",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "characterId",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "enum Autarch.MonsterResolution",
+                "name": "resolution",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "gainedExp",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256[]",
+                "name": "encounterIndexes",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "DungeonMonster",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "characterId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "prevHp",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newHp",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256[]",
+                "name": "encounterIndexes",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "DungeonRest",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "characterId",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "bytes32",
+                "name": "dungeonId",
+                "type": "bytes32"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256[]",
+                "name": "encounterIndexes",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "DungeonStarted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "bytes32",
+                "name": "itemId",
+                "type": "bytes32"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "item",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "indexed": false,
+                "internalType": "string",
+                "name": "symbol",
+                "type": "string"
+            }
+        ],
+        "name": "ItemCreated",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "character721",
+        "outputs": [
+            { "internalType": "contract Character721", "name": "", "type": "address" }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "uint256", "name": "characterId", "type": "uint256" },
+            { "internalType": "uint256", "name": "encounterIndex", "type": "uint256" }
+        ],
+        "name": "continueDungeon",
+        "outputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "encounterIndexes",
+                "type": "uint256[]"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "bytes32", "name": "dungeonId", "type": "bytes32" },
+            {
+                "internalType": "uint256",
+                "name": "totalEncounters",
+                "type": "uint256"
+            },
+            { "internalType": "uint256", "name": "restChance", "type": "uint256" },
+            { "internalType": "uint256", "name": "monsterChance", "type": "uint256" },
+            { "internalType": "uint256", "name": "itemChance", "type": "uint256" },
+            {
+                "components": [
+                    { "internalType": "uint256", "name": "chance", "type": "uint256" },
+                    { "internalType": "bytes32", "name": "monsterId", "type": "bytes32" }
+                ],
+                "internalType": "struct Autarch.MonsterEncounter[]",
+                "name": "monsterEncounters",
+                "type": "tuple[]"
+            },
+            {
+                "components": [
+                    { "internalType": "uint256", "name": "chance", "type": "uint256" },
+                    { "internalType": "bytes32", "name": "itemId", "type": "bytes32" }
+                ],
+                "internalType": "struct Autarch.ItemEncounter[]",
+                "name": "itemEncounters",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "createDungeon",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "string", "name": "name", "type": "string" },
+            { "internalType": "string", "name": "symbol", "type": "string" },
+            {
+                "components": [
+                    {
+                        "internalType": "enum Autarch.ItemType",
+                        "name": "itemType",
+                        "type": "uint8"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "enum Autarch.EffectTrigger",
+                                "name": "effectTrigger",
+                                "type": "uint8"
+                            },
+                            {
+                                "internalType": "enum Autarch.EffectType",
+                                "name": "effectType",
+                                "type": "uint8"
+                            },
+                            { "internalType": "uint256", "name": "value", "type": "uint256" },
+                            { "internalType": "bool", "name": "self", "type": "bool" }
+                        ],
+                        "internalType": "struct Autarch.Effect[]",
+                        "name": "effects",
+                        "type": "tuple[]"
+                    }
+                ],
+                "internalType": "struct Autarch.ItemData",
+                "name": "data",
+                "type": "tuple"
+            }
+        ],
+        "name": "createItem",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "bytes32", "name": "monsterId", "type": "bytes32" },
+            { "internalType": "uint256", "name": "exp", "type": "uint256" },
+            {
+                "components": [
+                    { "internalType": "uint256", "name": "maxHp", "type": "uint256" },
+                    { "internalType": "uint256", "name": "armor", "type": "uint256" },
+                    { "internalType": "uint256", "name": "attack", "type": "uint256" },
+                    { "internalType": "uint256", "name": "speed", "type": "uint256" }
+                ],
+                "internalType": "struct Autarch.Stats",
+                "name": "stats",
+                "type": "tuple"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "enum Autarch.EffectTrigger",
+                        "name": "effectTrigger",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "enum Autarch.EffectType",
+                        "name": "effectType",
+                        "type": "uint8"
+                    },
+                    { "internalType": "uint256", "name": "value", "type": "uint256" },
+                    { "internalType": "bool", "name": "self", "type": "bool" }
+                ],
+                "internalType": "struct Autarch.Effect[]",
+                "name": "effects",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "createMonster",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "bytes32", "name": "itemId", "type": "bytes32" }
+        ],
+        "name": "getItemAddress",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "item20Implementation",
+        "outputs": [
+            { "internalType": "contract Item20", "name": "", "type": "address" }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "string", "name": "name", "type": "string" },
+            { "internalType": "uint256", "name": "classIndex", "type": "uint256" }
+        ],
+        "name": "mintCharacter",
+        "outputs": [
+            { "internalType": "uint256", "name": "characterId", "type": "uint256" }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    { "internalType": "bytes32", "name": "itemId", "type": "bytes32" },
+                    { "internalType": "uint256", "name": "amount", "type": "uint256" }
+                ],
+                "internalType": "struct Autarch.StartingItem[]",
+                "name": "newStartingItems",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "setStartingItems",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            { "internalType": "bytes32", "name": "dungeonId", "type": "bytes32" },
+            { "internalType": "uint256", "name": "characterId", "type": "uint256" },
+            { "internalType": "bytes32[]", "name": "itemIds", "type": "bytes32[]" }
+        ],
+        "name": "startDungeon",
+        "outputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "encounterIndexes",
+                "type": "uint256[]"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+] as const;  
